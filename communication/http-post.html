@@ -1,0 +1,304 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>HTTP POST - OneBot V11 Spec</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">OneBot V11 Spec</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="http-post"><a class="header" href="#http-post">HTTP POST</a></h1>
+<ul>
+<li><a href="#%E4%B8%8A%E6%8A%A5">上报</a></li>
+<li><a href="#%E7%AD%BE%E5%90%8D">签名</a></li>
+<li><a href="#%E5%BF%AB%E9%80%9F%E6%93%8D%E4%BD%9C">快速操作</a></li>
+<li><a href="#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE">相关配置</a></li>
+</ul>
+<p>OneBot 在收到事件后，向配置指定的事件上报 URL 通过 POST 请求发送事件数据，事件数据以 JSON 格式表示。请求结束后，OneBot 处理用户返回的响应中的「快速操作」，如快速回复、快速禁言等。</p>
+<h2 id="上报"><a class="header" href="#上报">上报</a></h2>
+<p>假设配置指定的上报 URL 为 <code>http://127.0.0.1:8080/</code>，以私聊消息为例，事件上报的 POST 请求如下：</p>
+<pre><code class="language-http">POST / HTTP/1.1
+Host: 127.0.0.1:8080
+Content-Type: application/json
+X-Self-ID: 10001000
+
+{
+    "time": 1515204254,
+    "self_id": 10001000,
+    "post_type": "message",
+    "message_type": "private",
+    "sub_type": "friend",
+    "message_id": 12,
+    "user_id": 12345678,
+    "message": "你好～",
+    "raw_message": "你好～",
+    "font": 456,
+    "sender": {
+        "nickname": "小不点",
+        "sex": "male",
+        "age": 18
+    }
+}
+</code></pre>
+<p>请求头中的 <code>X-Self-ID</code> 表示当前正在上报的机器人 QQ 号，和请求正文 JSON 中的 <code>self_id</code> 一致。</p>
+<p>上例中的事件为私聊消息事件，其它事件及它们的上报内容和支持的响应数据，见 <a href="../event/">事件</a>。</p>
+<h2 id="签名"><a class="header" href="#签名">签名</a></h2>
+<p>如果配置中给出了 <code>secret</code>，即签名密钥，则会在每次上报的请求头中加入 HMAC 签名，即 <code>X-Signature</code> 头，如：</p>
+<pre><code class="language-http">POST / HTTP/1.1
+Host: 127.0.0.1:8080
+Content-Type: application/json
+X-Signature: sha1=f9ddd4863ace61e64f462d41ca311e3d2c1176e2
+X-Self-ID: 10001000
+
+...
+</code></pre>
+<p>签名以 <code>secret</code> 作为密钥，HTTP 正文作为消息，进行 HMAC SHA1 哈希，用户后端可以通过该哈希值来验证上报的数据确实来自 OneBot，而不是第三方伪造的。HMAC 介绍见 <a href="https://zh.wikipedia.org/zh-cn/%E9%87%91%E9%91%B0%E9%9B%9C%E6%B9%8A%E8%A8%8A%E6%81%AF%E9%91%91%E5%88%A5%E7%A2%BC">密钥散列消息认证码</a>。</p>
+<h3 id="hmac-sha1-校验的示例"><a class="header" href="#hmac-sha1-校验的示例">HMAC SHA1 校验的示例</a></h3>
+<h4 id="python--flask"><a class="header" href="#python--flask">Python + Flask</a></h4>
+<pre><code class="language-python">import hmac
+from flask import Flask, request
+
+app = Flask(__name__)
+
+@app.route('/', methods=['POST'])
+def receive():
+    sig = hmac.new(b'&lt;your-key&gt;', request.get_data(), 'sha1').hexdigest()
+    received_sig = request.headers['X-Signature'][len('sha1='):]
+    if sig == received_sig:
+        # 请求确实来自于 OneBot
+        pass
+    else:
+        # 假的上报
+        pass
+</code></pre>
+<h4 id="nodejs--koa"><a class="header" href="#nodejs--koa">Node.js + Koa</a></h4>
+<pre><code class="language-js">const crypto = require('crypto');
+const secret = 'some-secret';
+
+// 在 Koa 的请求 context 中
+ctx.assert(ctx.request.headers['x-signature'] !== undefined, 401);
+const hmac = crypto.createHmac('sha1', secret);
+hmac.update(ctx.request.rawBody);
+const sig = hmac.digest('hex');
+ctx.assert(ctx.request.headers['x-signature'] === `sha1=${sig}`, 403);
+</code></pre>
+<h2 id="快速操作"><a class="header" href="#快速操作">快速操作</a></h2>
+<p>事件上报的后端可以在上报请求的响应中直接指定一些简单的操作，称为「快速操作」，如快速回复、快速禁言等。如果不需要使用这个特性，返回 HTTP 响应状态码 204，或保持响应正文内容为空；如果需要，则使用 JSON 作为响应正文，<code>Content-Type</code> 响应头任意（目前不会进行判断），但设置为 <code>application/json</code> 最好，以便减少不必要的升级成本，因为如果以后有需求，可能会加入判断。</p>
+<blockquote>
+<p><strong>注意</strong>：无论是否需要使用快速操作，事件上报后端都应该在处理完毕后返回 HTTP 响应，否则 OneBot 将一直等待直到超时。</p>
+</blockquote>
+<p>响应的 JSON 数据中，支持的操作随事件的不同而不同，会在事件列表中的「快速操作」标题下给出。需要指出的是，<strong>响应数据中的每个字段都是可选的</strong>，只有在字段存在（明确要求进行操作）时，才会触发相应的操作，否则将保持对机器人整体运行状态影响最小的行为（比如默认不回复消息、不处理请求）。</p>
+<p>以私聊消息为例，事件上报后端若返回如下 JSON 作为响应正文：</p>
+<pre><code class="language-json">{
+    "reply": "嗨～"
+}
+</code></pre>
+<p>则会回复 <code>嗨～</code>。</p>
+<h2 id="相关配置"><a class="header" href="#相关配置">相关配置</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>配置项名称</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>http_post.enable</code></td><td><code>true</code></td><td>是否启用 HTTP POST</td></tr>
+<tr><td><code>http_post.url</code></td><td>空</td><td>事件上报 URL</td></tr>
+<tr><td><code>http_post.timeout</code></td><td><code>0</code></td><td>HTTP 上报超时时间，单位秒，0 表示不设置超时</td></tr>
+<tr><td><code>http_post.secret</code></td><td>空</td><td>上报数据签名密钥</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="http.html">HTTP</a></td><td><a href="ws.html">正向 WebSocket</a></td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../communication/http.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../communication/ws.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../communication/http.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../communication/ws.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

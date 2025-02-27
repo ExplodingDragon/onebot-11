@@ -1,0 +1,2015 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>OneBot V11 Spec</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">OneBot V11 Spec</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="介绍"><a class="header" href="#介绍">介绍</a></h1>
+<ul>
+<li><a href="index.html#%E8%83%8C%E6%99%AF">背景</a></li>
+<li><a href="index.html#%E5%8A%A8%E6%9C%BA">动机</a></li>
+<li><a href="index.html#%E9%A2%84%E6%9C%9F">预期</a></li>
+<li><a href="index.html#%E5%86%85%E5%AE%B9%E7%9B%AE%E5%BD%95">内容目录</a></li>
+</ul>
+<p>OneBot 标准是从原 CKYU 平台的 CQHTTP 插件接口修改而来的通用聊天机器人应用接口标准。</p>
+<h2 id="背景"><a class="header" href="#背景">背景</a></h2>
+<p>CQHTTP 插件是 2017 年初出现的基于 CKYU 机器人平台的一款开源免费插件，它使用户能够通过 HTTP 或 WebSocket 对 CKYU 的事件进行上报以及接收请求来调用 CKYU 的 DLL 接口，从而可以使用其它语言（不方便编译到原生二进制的语言）编写 CKYU 插件。</p>
+<p>有非常多的开发者使用 Python、Java、Node.js 等 web 开发常用语言基于 CQHTTP 插件编写各式各样的聊天机器人。</p>
+<p>在新的机器人平台 Mirai 开始发展之后，以及 CKYU 决定停运之后，为了让原来基于 CQHTTP 插件编写的机器人能够继续运行，一些开发者在其它机器人平台上编写了兼容 CQHTTP 接口的插件/模块。</p>
+<h2 id="动机"><a class="header" href="#动机">动机</a></h2>
+<p>基于 CQHTTP 插件编写的机器人项目有很多，CKYU 停运后，如果不能平滑迁移到其它平台，这些项目的很多代码都需要重写，甚至有很多项目可能被迫放弃维护，这对机器人开发社区来说是一种损失和浪费。</p>
+<p>目前各 CQHTTP 兼容项目通常是实现了部分原 CQHTTP 插件的接口，并利用新平台的特性，新增了一些拓展接口。长远来看，这可能导致不同兼容项目最终形成了各自的「CQHTTP 接口变种」，当用户深度接入其中一个兼容项目后，可能又会出现与其它变种不兼容的情况，最终仍然存在潜在的迁移困难。</p>
+<p>本项目希望通过改写原 CQHTTP 插件文档 + 引入 CQHTTP 兼容项目的新特性的方式，维护一个统一的、不断发展的接口标准（即 OneBot 标准），推动各 CQHTTP 兼容项目实现长远的兼容，为用户带来便利。</p>
+<h2 id="预期"><a class="header" href="#预期">预期</a></h2>
+<p>开发者可以在各类机器人平台实现 OneBot 标准，从而使用户可以将基于 OneBot 标准的机器人项目无缝迁移到这些平台。</p>
+<p>当需要添加新的功能（例如新的事件、API、消息段类型等）时，可以通过 pull request 扩充本标准，此后其它 OneBot 实现在添加同一功能时应参考扩充后的标准。</p>
+<h2 id="内容目录"><a class="header" href="#内容目录">内容目录</a></h2>
+<ul>
+<li><strong>通信</strong>
+<ul>
+<li><a href="communication/README.html">通信概述</a></li>
+<li><a href="communication/http.html">HTTP</a></li>
+<li><a href="communication/http-post.html">HTTP POST</a></li>
+<li><a href="communication/ws.html">正向 WebSocket</a></li>
+<li><a href="communication/ws-reverse.html">反向 WebSocket</a></li>
+<li><a href="communication/authorization.html">鉴权</a></li>
+</ul>
+</li>
+<li><strong>消息</strong>
+<ul>
+<li><a href="message/README.html">消息概述</a></li>
+<li><a href="message/string.html">字符串格式</a></li>
+<li><a href="message/array.html">数组格式</a></li>
+<li><a href="message/segment.html">消息段类型</a></li>
+</ul>
+</li>
+<li><strong>API</strong>
+<ul>
+<li><a href="api/README.html">API 概述</a></li>
+<li><a href="api/public.html">公开 API</a></li>
+<li><a href="api/hidden.html">隐藏 API</a></li>
+</ul>
+</li>
+<li><strong>事件</strong>
+<ul>
+<li><a href="event/README.html">事件概述</a></li>
+<li><a href="event/message.html">消息事件</a></li>
+<li><a href="event/notice.html">通知事件</a></li>
+<li><a href="event/request.html">请求事件</a></li>
+<li><a href="event/meta.html">元事件</a></li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="通信"><a class="header" href="#通信">通信</a></h1>
+<p>目前包括四种通信方式：</p>
+<ul>
+<li><strong>HTTP</strong>：OneBot 作为 HTTP 服务端，提供 API 调用服务</li>
+<li><strong>HTTP POST</strong>：OneBot 作为 HTTP 客户端，向用户配置的 URL 推送事件，并处理用户返回的响应</li>
+<li><strong>正向 WebSocket</strong>：OneBot 作为 WebSocket 服务端，接受用户连接，提供 API 调用和事件推送服务</li>
+<li><strong>反向 WebSocket</strong>：OneBot 作为 WebSocket 客户端，主动连接用户配置的 URL，提供 API 调用和事件推送服务</li>
+</ul>
+<p>所有通信方式传输的数据都使用 UTF-8 编码。</p>
+<blockquote>
+<p><strong>注意</strong></p>
+<p>在原 CQHTTP 插件中，HTTP POST 没有被列为一种独立的通信方式，而是单纯由 <code>post_url</code> 指定上报地址然后上报，但严格来说它也是一种通信方式，只用于推送事件，并且用法不同于 HTTP。这里为了清晰起见，把它增列为一种通信方式。</p>
+</blockquote>
+<hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td>无</td><td><a href="communication/http.html">HTTP</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="http"><a class="header" href="#http">HTTP</a></h1>
+<ul>
+<li><a href="communication/http.html#%E8%AF%B7%E6%B1%82">请求</a></li>
+<li><a href="communication/http.html#%E5%93%8D%E5%BA%94">响应</a></li>
+<li><a href="communication/http.html#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE">相关配置</a></li>
+</ul>
+<p>OneBot 在启动时开启一个 HTTP 服务器，监听配置文件指定的 IP 和端口，接受路径为 <code>/:action</code> 的 API 请求（或 <code>/:action/</code>），如 <code>/send_private_msg</code>，请求可以使用 GET 或 POST 方法，可以通过 query 参数（<code>?arg1=111&amp;arg2=222</code>）、urlencoded 表单（<code>arg1=111&amp;arg2=222</code>）或 JSON（<code>{"arg1": "111", "arg2": "222"}</code>）传递参数。</p>
+<p>参数可能有不同的类型，当用户通过 query 参数或 urlencoded 表单传参，或在 JSON 中使用字符串作为参数值时，OneBot 实现需要从字符串解析出对应类型的数据。</p>
+<h2 id="请求"><a class="header" href="#请求">请求</a></h2>
+<p>假设配置中指定了 IP 和端口分别为 <code>127.0.0.1</code> 和 <code>5700</code>，则在浏览器中访问 <code>http://127.0.0.1:5700/send_private_msg?user_id=1000010000&amp;message=hello</code> 即可给 QQ 号为 <code>1000010000</code> 的好友发送私聊消息 <code>hello</code>。</p>
+<p>如需使用 JSON 传递参数，则请求如下：</p>
+<pre><code class="language-http">POST /send_private_msg HTTP/1.1
+Host: 127.0.0.1:5700
+Content-Type: application/json
+
+{
+    "user_id": 1000010000,
+    "message": "hello"
+}
+</code></pre>
+<blockquote>
+<p><strong>注意</strong></p>
+<ul>
+<li>当使用 query 参数或 urlencoded 表单传递参数时，参数值必须进行 urlencode。</li>
+<li>当使用 urlencoded 表单或 JSON 传递参数时，请求头中的 <code>Content-Type</code> 必须对应的为 <code>application/x-www-form-urlencoded</code> 或 <code>application/json</code>。</li>
+</ul>
+</blockquote>
+<p>上例中调用的 API（即 action）为 <code>send_private_msg</code>，其它 API 及它们的参数和响应内容，见 <a href="communication/../api/">API</a>。</p>
+<h2 id="响应"><a class="header" href="#响应">响应</a></h2>
+<p>收到 API 请求并处理后，OneBot 会返回一个 HTTP 响应，根据具体情况不同，HTTP 状态码不同：</p>
+<ul>
+<li>如果 access token 未提供，状态码为 401（关于 access token，见 <a href="communication/authorization.html">鉴权</a>）</li>
+<li>如果 access token 不符合，状态码为 403</li>
+<li>如果 POST 请求的 Content-Type 不支持，状态码为 406</li>
+<li>如果 POST 请求的正文格式不正确，状态码为 400</li>
+<li>如果 API 不存在，状态码为 404</li>
+<li>剩下的所有情况，无论操作实际成功与否，状态码都是 200</li>
+</ul>
+<p>状态码为 200 时，响应内容为 JSON 格式，基本结构如下：</p>
+<pre><code class="language-json">{
+    "status": "ok",
+    "retcode": 0,
+    "data": {
+        "id": 123456,
+        "nickname": "滑稽"
+    }
+}
+</code></pre>
+<p><code>status</code> 字段表示请求的状态：</p>
+<ul>
+<li><code>ok</code> 表示操作成功，同时 <code>retcode</code> （返回码）会等于 0</li>
+<li><code>async</code> 表示请求已提交异步处理，此时 <code>retcode</code> 为 1，具体成功或失败将无法获知</li>
+<li><code>failed</code> 表示操作失败，此时 <code>retcode</code> 既不是 0 也不是 1，具体错误信息应参考 OneBot 实现的日志</li>
+</ul>
+<p><code>data</code> 字段为 API 返回数据的内容，对于踢人、禁言等不需要返回数据的操作，这里为 null，对于获取群成员信息这类操作，这里为所获取的数据的对象，具体的数据内容将会在相应的 API 描述中给出。注意，异步版本的 API，<code>data</code> 永远是 null，即使其相应的同步接口本身是有数据。</p>
+<h2 id="相关配置"><a class="header" href="#相关配置">相关配置</a></h2>
+<blockquote>
+<p><strong>提示</strong></p>
+<p>配置项名称仅供参考，不同 OneBot 实现可以自行定义名称，只需在样例配置中给出注释即可。</p>
+</blockquote>
+<div class="table-wrapper"><table><thead><tr><th>配置项</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>http.enable</code></td><td><code>true</code></td><td>是否启用 HTTP</td></tr>
+<tr><td><code>http.host</code></td><td><code>0.0.0.0</code></td><td>HTTP 服务器监听的 IP</td></tr>
+<tr><td><code>http.port</code></td><td><code>5700</code></td><td>HTTP 服务器监听的端口</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="communication/README.html">通信概述</a></td><td><a href="communication/http-post.html">HTTP POST</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="http-post"><a class="header" href="#http-post">HTTP POST</a></h1>
+<ul>
+<li><a href="communication/http-post.html#%E4%B8%8A%E6%8A%A5">上报</a></li>
+<li><a href="communication/http-post.html#%E7%AD%BE%E5%90%8D">签名</a></li>
+<li><a href="communication/http-post.html#%E5%BF%AB%E9%80%9F%E6%93%8D%E4%BD%9C">快速操作</a></li>
+<li><a href="communication/http-post.html#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE">相关配置</a></li>
+</ul>
+<p>OneBot 在收到事件后，向配置指定的事件上报 URL 通过 POST 请求发送事件数据，事件数据以 JSON 格式表示。请求结束后，OneBot 处理用户返回的响应中的「快速操作」，如快速回复、快速禁言等。</p>
+<h2 id="上报"><a class="header" href="#上报">上报</a></h2>
+<p>假设配置指定的上报 URL 为 <code>http://127.0.0.1:8080/</code>，以私聊消息为例，事件上报的 POST 请求如下：</p>
+<pre><code class="language-http">POST / HTTP/1.1
+Host: 127.0.0.1:8080
+Content-Type: application/json
+X-Self-ID: 10001000
+
+{
+    "time": 1515204254,
+    "self_id": 10001000,
+    "post_type": "message",
+    "message_type": "private",
+    "sub_type": "friend",
+    "message_id": 12,
+    "user_id": 12345678,
+    "message": "你好～",
+    "raw_message": "你好～",
+    "font": 456,
+    "sender": {
+        "nickname": "小不点",
+        "sex": "male",
+        "age": 18
+    }
+}
+</code></pre>
+<p>请求头中的 <code>X-Self-ID</code> 表示当前正在上报的机器人 QQ 号，和请求正文 JSON 中的 <code>self_id</code> 一致。</p>
+<p>上例中的事件为私聊消息事件，其它事件及它们的上报内容和支持的响应数据，见 <a href="communication/../event/">事件</a>。</p>
+<h2 id="签名"><a class="header" href="#签名">签名</a></h2>
+<p>如果配置中给出了 <code>secret</code>，即签名密钥，则会在每次上报的请求头中加入 HMAC 签名，即 <code>X-Signature</code> 头，如：</p>
+<pre><code class="language-http">POST / HTTP/1.1
+Host: 127.0.0.1:8080
+Content-Type: application/json
+X-Signature: sha1=f9ddd4863ace61e64f462d41ca311e3d2c1176e2
+X-Self-ID: 10001000
+
+...
+</code></pre>
+<p>签名以 <code>secret</code> 作为密钥，HTTP 正文作为消息，进行 HMAC SHA1 哈希，用户后端可以通过该哈希值来验证上报的数据确实来自 OneBot，而不是第三方伪造的。HMAC 介绍见 <a href="https://zh.wikipedia.org/zh-cn/%E9%87%91%E9%91%B0%E9%9B%9C%E6%B9%8A%E8%A8%8A%E6%81%AF%E9%91%91%E5%88%A5%E7%A2%BC">密钥散列消息认证码</a>。</p>
+<h3 id="hmac-sha1-校验的示例"><a class="header" href="#hmac-sha1-校验的示例">HMAC SHA1 校验的示例</a></h3>
+<h4 id="python--flask"><a class="header" href="#python--flask">Python + Flask</a></h4>
+<pre><code class="language-python">import hmac
+from flask import Flask, request
+
+app = Flask(__name__)
+
+@app.route('/', methods=['POST'])
+def receive():
+    sig = hmac.new(b'&lt;your-key&gt;', request.get_data(), 'sha1').hexdigest()
+    received_sig = request.headers['X-Signature'][len('sha1='):]
+    if sig == received_sig:
+        # 请求确实来自于 OneBot
+        pass
+    else:
+        # 假的上报
+        pass
+</code></pre>
+<h4 id="nodejs--koa"><a class="header" href="#nodejs--koa">Node.js + Koa</a></h4>
+<pre><code class="language-js">const crypto = require('crypto');
+const secret = 'some-secret';
+
+// 在 Koa 的请求 context 中
+ctx.assert(ctx.request.headers['x-signature'] !== undefined, 401);
+const hmac = crypto.createHmac('sha1', secret);
+hmac.update(ctx.request.rawBody);
+const sig = hmac.digest('hex');
+ctx.assert(ctx.request.headers['x-signature'] === `sha1=${sig}`, 403);
+</code></pre>
+<h2 id="快速操作"><a class="header" href="#快速操作">快速操作</a></h2>
+<p>事件上报的后端可以在上报请求的响应中直接指定一些简单的操作，称为「快速操作」，如快速回复、快速禁言等。如果不需要使用这个特性，返回 HTTP 响应状态码 204，或保持响应正文内容为空；如果需要，则使用 JSON 作为响应正文，<code>Content-Type</code> 响应头任意（目前不会进行判断），但设置为 <code>application/json</code> 最好，以便减少不必要的升级成本，因为如果以后有需求，可能会加入判断。</p>
+<blockquote>
+<p><strong>注意</strong>：无论是否需要使用快速操作，事件上报后端都应该在处理完毕后返回 HTTP 响应，否则 OneBot 将一直等待直到超时。</p>
+</blockquote>
+<p>响应的 JSON 数据中，支持的操作随事件的不同而不同，会在事件列表中的「快速操作」标题下给出。需要指出的是，<strong>响应数据中的每个字段都是可选的</strong>，只有在字段存在（明确要求进行操作）时，才会触发相应的操作，否则将保持对机器人整体运行状态影响最小的行为（比如默认不回复消息、不处理请求）。</p>
+<p>以私聊消息为例，事件上报后端若返回如下 JSON 作为响应正文：</p>
+<pre><code class="language-json">{
+    "reply": "嗨～"
+}
+</code></pre>
+<p>则会回复 <code>嗨～</code>。</p>
+<h2 id="相关配置-1"><a class="header" href="#相关配置-1">相关配置</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>配置项名称</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>http_post.enable</code></td><td><code>true</code></td><td>是否启用 HTTP POST</td></tr>
+<tr><td><code>http_post.url</code></td><td>空</td><td>事件上报 URL</td></tr>
+<tr><td><code>http_post.timeout</code></td><td><code>0</code></td><td>HTTP 上报超时时间，单位秒，0 表示不设置超时</td></tr>
+<tr><td><code>http_post.secret</code></td><td>空</td><td>上报数据签名密钥</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="communication/http.html">HTTP</a></td><td><a href="communication/ws.html">正向 WebSocket</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="正向-websocket"><a class="header" href="#正向-websocket">正向 WebSocket</a></h1>
+<ul>
+<li><a href="communication/ws.html#api-%E6%8E%A5%E5%8F%A3"><code>/api</code> 接口</a></li>
+<li><a href="communication/ws.html#event-%E6%8E%A5%E5%8F%A3"><code>/event</code> 接口</a></li>
+<li><a href="communication/ws.html#-%E6%8E%A5%E5%8F%A3"><code>/</code> 接口</a></li>
+<li><a href="communication/ws.html#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE">相关配置</a></li>
+</ul>
+<p>OneBot 在启动时开启一个 WebSocket 服务器，监听配置文件指定的 IP 和端口，接受路径为 <code>/api</code>（或 <code>/api/</code>）、<code>/event</code>（或 <code>/event/</code>）、<code>/</code> 的连接请求。连接建立后，将一直保持连接（用户可主动断开连接），并根据路径的不同，提供 API 调用或事件推送服务。通过 WebSocket 消息发送的数据全部使用 JSON 格式。</p>
+<h2 id="api-接口"><a class="header" href="#api-接口"><code>/api</code> 接口</a></h2>
+<p>连接此接口后，向 OneBot 发送如下结构的 JSON 对象，即可调用相应的 API：</p>
+<pre><code class="language-json">{
+    "action": "send_private_msg",
+    "params": {
+        "user_id": 10001000,
+        "message": "你好"
+    },
+    "echo": "123"
+}
+</code></pre>
+<p>这里的 <code>action</code> 参数用于指定要调用的 API，具体参考 <a href="communication/../api/">API</a>；<code>params</code> 用于传入参数，如果要调用的 API 不需要参数，则可以不加；<code>echo</code> 字段是可选的，类似于 <a href="https://www.jsonrpc.org/specification">JSON RPC</a> 的 <code>id</code> 字段，用于唯一标识一次请求，可以是任何类型的数据，OneBot 将会在调用结果中原样返回。</p>
+<p>客户端向 OneBot 发送 JSON 之后，OneBot 会往回发送一个调用结果，结构和 <a href="communication/http.html#%E5%93%8D%E5%BA%94">HTTP 的响应</a> 相似，（除了包含请求中传入的 <code>echo</code> 字段外）唯一的区别在于，通过 HTTP 调用 API 时，HTTP 状态码反应的错误情况被移动到响应 JSON 的 <code>retcode</code> 字段，例如，HTTP 返回 404 的情况，对应到 WebSocket 的回复，是：</p>
+<pre><code class="language-json">{
+    "status": "failed",
+    "retcode": 1404,
+    "data": null,
+    "echo": "123"
+}
+</code></pre>
+<p>下面是 <code>retcode</code> 和 HTTP 状态码的对照：</p>
+<div class="table-wrapper"><table><thead><tr><th><code>retcode</code></th><th>HTTP 接口中的状态码</th></tr></thead><tbody>
+<tr><td>1400</td><td>400</td></tr>
+<tr><td>1401</td><td>401</td></tr>
+<tr><td>1403</td><td>403</td></tr>
+<tr><td>1404</td><td>404</td></tr>
+</tbody></table>
+</div>
+<p>实际上 <code>1401</code> 和 <code>1403</code> 并不会真的返回，因为如果建立连接时鉴权失败，连接会直接断开，根本不可能进行到后面的 API 调用阶段。</p>
+<h2 id="event-接口"><a class="header" href="#event-接口"><code>/event</code> 接口</a></h2>
+<p>连接此接口后，OneBot 会在收到事件后推送至客户端，推送的格式和 <a href="communication/http-post.html#%E4%B8%8A%E6%8A%A5">HTTP POST 的上报</a> 完全一致，事件的具体内容见 <a href="communication/../event/">事件</a>。</p>
+<p>与 HTTP POST 不同的是，WebSocket 推送不会对数据进行签名（即 HTTP POST 中的 <code>X-Signature</code> 请求头在这里没有等价的东西），并且也不会处理响应数据。如果对事件进行处理的时候需要调用接口，请使用 <a href="communication/ws.html#api-%E6%8E%A5%E5%8F%A3"><code>/api</code> 接口</a> 或使用 HTTP 调用 API。</p>
+<p>此外，这个接口和 HTTP POST 不冲突，如果启用了正向 WebSocket，同时也配置了 HTTP POST 的上报地址，OneBot 会先通过 HTTP POST 上报，在处理完它的响应后，向所有已连接了 <code>/event</code> 的 WebSocket 客户端推送事件。</p>
+<h2 id="-接口"><a class="header" href="#-接口"><code>/</code> 接口</a></h2>
+<p>在一条连接上同时提供 <code>/api</code> 和 <code>/event</code> 的服务，使用方式参考上面。</p>
+<h2 id="相关配置-2"><a class="header" href="#相关配置-2">相关配置</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>配置项名称</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>ws.enable</code></td><td><code>false</code></td><td>是否启用正向 WebSocket</td></tr>
+<tr><td><code>ws.host</code></td><td><code>0.0.0.0</code></td><td>WebSocket 服务器监听的 IP</td></tr>
+<tr><td><code>ws.port</code></td><td><code>6700</code></td><td>WebSocket 服务器监听的端口</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="communication/http-post.html">HTTP POST</a></td><td><a href="communication/ws-reverse.html">反向 WebSocket</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="反向-websocket"><a class="header" href="#反向-websocket">反向 WebSocket</a></h1>
+<ul>
+<li><a href="communication/ws-reverse.html#%E8%BF%9E%E6%8E%A5%E8%AF%B7%E6%B1%82">连接请求</a></li>
+<li><a href="communication/ws-reverse.html#%E6%96%AD%E7%BA%BF%E9%87%8D%E8%BF%9E">断线重连</a></li>
+<li><a href="communication/ws-reverse.html#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE">相关配置</a></li>
+</ul>
+<p>OneBot 启动后，作为客户端向用户配置的反向 WebSocket URL 建立连接。连接建立后，将一直保持连接，并根据连接的 URL 不同，提供 API 调用或事件推送服务。通过 WebSocket 消息发送的数据全部使用 JSON 格式。</p>
+<h2 id="连接请求"><a class="header" href="#连接请求">连接请求</a></h2>
+<p>根据配置的不同，连接用户提供的 URL 的客户端有三种：API 客户端、Event 客户端和 Universal 客户端。API 客户端提供 API 调用服务；Event 客户端提供事件推送服务；Universal 客户端<strong>在一条连接上</strong>同时提供两种服务。</p>
+<blockquote>
+<p><strong>注意</strong></p>
+<p>只要服务器能够正确区分，API 客户端和 Event 客户端可以向同一个 URL 建立连接，但这是两条连接，和 Universal 客户端不同。</p>
+</blockquote>
+<p>各客户端建立连接的方式相同，以 API 客户端为例，假设设置了 API URL 为 <code>ws://127.0.0.1:8080/ws/api</code>，则连接请求如下：</p>
+<pre><code class="language-http">GET /ws/api HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: Upgrade
+Upgrade: websocket
+X-Self-ID: 10001000
+X-Client-Role: API
+...
+</code></pre>
+<p>请求头中的 <code>X-Self-ID</code> 表示当前正在建立连接的机器人 QQ 号；<code>X-Client-Role</code> 表示当前正在建立连接的客户端类型，对于 Event 客户端和 Universal 客户端，这里分别是 <code>Event</code> 和 <code>Universal</code>。</p>
+<p>连接建立后，使用方式同 <a href="communication/ws.html">正向 WebSocket</a>。</p>
+<h2 id="断线重连"><a class="header" href="#断线重连">断线重连</a></h2>
+<p>当由于各种意外情况，连接断开时，OneBot 将以配置中指定的时间间隔不断尝试重连，直到再次连接成功。</p>
+<h2 id="相关配置-3"><a class="header" href="#相关配置-3">相关配置</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>配置项</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>ws_reverse.enable</code></td><td><code>true</code></td><td>是否启用反向 WebSocket</td></tr>
+<tr><td><code>ws_reverse.url</code></td><td>空</td><td>反向 WebSocket API、Event、Universal 共用 URL</td></tr>
+<tr><td><code>ws_reverse.api_url</code></td><td>空</td><td>反向 WebSocket API URL，如果为空，则使用 <code>ws_reverse.url</code> 指定的值</td></tr>
+<tr><td><code>ws_reverse.event_url</code></td><td>空</td><td>反向 WebSocket Event URL，如果为空，则使用 <code>ws_reverse.url</code> 指定的值</td></tr>
+<tr><td><code>ws_reverse.use_universal_client</code></td><td><code>false</code></td><td>是否使用 Universal 客户端</td></tr>
+<tr><td><code>ws_reverse.reconnect_interval</code></td><td><code>3000</code></td><td>反向 WebSocket 客户端断线重连间隔，单位毫秒</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="communication/ws.html">正向 WebSocket</a></td><td><a href="communication/authorization.html">鉴权</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="鉴权"><a class="header" href="#鉴权">鉴权</a></h1>
+<ul>
+<li><a href="communication/authorization.html#http-%E5%92%8C%E6%AD%A3%E5%90%91-websocket">HTTP 和正向 WebSocket</a></li>
+<li><a href="communication/authorization.html#%E5%8F%8D%E5%90%91-websocket">反向 WebSocket</a></li>
+<li><a href="communication/authorization.html#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE">相关配置</a></li>
+</ul>
+<p>在 HTTP POST 通信方式中，OneBot 提供了 <a href="communication/http-post.html#%E7%AD%BE%E5%90%8D">签名</a> 来保证安全性，而在 HTTP、正向 WebSocket、反向 WebSocket 通信方式中，通过对 access token 进行验证来保证安全性。</p>
+<h2 id="http-和正向-websocket"><a class="header" href="#http-和正向-websocket">HTTP 和正向 WebSocket</a></h2>
+<p>如果配置文件中填写了 access token，则每次客户端向 OneBot 发送请求时需要在请求头中加入 <code>Authorization</code> 头，如：</p>
+<pre><code class="language-http">GET /get_friend_list HTTP/1.1
+...
+Authorization: Bearer kSLuTF2GC2Q4q4ugm3
+</code></pre>
+<p><code>Bearer</code> 后面需给出和 OneBot 配置中相同的 access token。</p>
+<p>在某些特殊情况下，可能无法修改请求头，则可以通过 query 参数传入 access token，例如：</p>
+<pre><code class="language-http">GET /get_friend_list?access_token=kSLuTF2GC2Q4q4ugm3 HTTP/1.1
+</code></pre>
+<h2 id="反向-websocket-1"><a class="header" href="#反向-websocket-1">反向 WebSocket</a></h2>
+<p>如果配置文件中填写了 access token，则每次 OneBot 的反向 WebSocket 客户端在向用户配置的 URL 建立连接的时候，会在请求头中加入 <code>Authorization</code> 头，如：</p>
+<pre><code class="language-http">GET /ws/api HTTP/1.1
+...
+Authorization: Bearer kSLuTF2GC2Q4q4ugm3
+</code></pre>
+<h2 id="相关配置-4"><a class="header" href="#相关配置-4">相关配置</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>配置项名称</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>auth.access_token</code></td><td>空</td><td>access token</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="communication/ws-reverse.html">反向 WebSocket</a></td><td><a href="communication/../message/README.html">消息概述</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="消息"><a class="header" href="#消息">消息</a></h1>
+<p>消息是 OneBot 标准中一个重要的数据类型，在发送消息的 API 和接收消息的事件中都有相关字段。目前消息的格式分为两种：字符串（string）和数组（array）。</p>
+<hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="message/../communication/authorization.html">鉴权</a></td><td><a href="message/string.html">字符串格式</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="字符串格式"><a class="header" href="#字符串格式">字符串格式</a></h1>
+<ul>
+<li><a href="message/string.html#cq-%E7%A0%81%E6%A0%BC%E5%BC%8F">CQ 码格式</a></li>
+<li><a href="message/string.html#%E8%BD%AC%E4%B9%89">转义</a></li>
+</ul>
+<p>字符串格式是 CKYU 原生所使用的消息格式，在本标准中将继续使用以保持兼容。在字符串格式中，无论纯文本还是图片、表情、链接分享等多媒体内容都放在同一个字符串里，即，一条消息对应一个字符串。以下是一个字符串格式消息的例子：</p>
+<pre><code>[CQ:face,id=178]看看我刚拍的照片[CQ:image,file=123.jpg]
+</code></pre>
+<p>在调用 API 发送这段消息时，JSON 如下：</p>
+<pre><code class="language-json">{
+    "user_id": 10001000,
+    "message": "[CQ:face,id=178]看看我刚拍的照片[CQ:image,file=123.jpg]"
+}
+</code></pre>
+<h2 id="cq-码格式"><a class="header" href="#cq-码格式">CQ 码格式</a></h2>
+<p>消息中的多媒体内容使用 CQ 码来表示，形如 <code>[CQ:face,id=178]</code>。其中，<code>[CQ:]</code> 是固定格式；<code>face</code> 是「功能名」，除了 <code>face</code> 还有许多不同的功能名；<code>id=178</code> 是「参数」，某些功能不需要参数，而另一些需要多个参数，当有多个参数时，参数间使用逗号分隔。</p>
+<p>一些 CQ 码的例子如下：</p>
+<pre><code>[CQ:shake]
+[CQ:face,id=178]
+[CQ:share,title=标题,url=http://baidu.com]
+</code></pre>
+<p>更多 CQ 码功能请参考 <a href="message/segment.html">消息段类型</a>。</p>
+<blockquote>
+<p><strong>注意</strong></p>
+<p>CQ 码中不应有多余的空格，例如不应该使用 <code>[CQ:face, id=178]</code>。</p>
+<p>CQ 码的参数值可以包含空格、换行、除 <code>[],&amp;</code> 之外的特殊符号等。在解析时，应直接取 <code>[CQ:</code> 后、第一个 <code>,</code> 或 <code>]</code> 前的部分为功能名，第一个 <code>,</code> 之后到 <code>]</code> 之间的部分为参数，按 <code>,</code> 分割后，每个部分第一个 <code>=</code> 前的内容为参数名，之后的部分为参数值。例如 <code>[CQ:share,title=标题中有=等号,url=http://baidu.com]</code> 中，功能名为 <code>share</code>，<code>title</code> 参数值为 <code>标题中有=等号</code>，<code>url</code> 参数值为 <code>http://baidu.com</code>。</p>
+</blockquote>
+<h2 id="转义"><a class="header" href="#转义">转义</a></h2>
+<p>CQ 码中包含一些特殊字符：<code>[</code>、<code>]</code>、<code>,</code> 等，而 CQ 码又是可能混杂在纯文本内容之中的，因此消息中的纯文本内容需要对特殊字符进行转义，以避免歧义。具体的转义规则如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>转义前</th><th>转义后</th></tr></thead><tbody>
+<tr><td><code>&amp;</code></td><td><code>&amp;amp;</code></td></tr>
+<tr><td><code>[</code></td><td><code>&amp;#91;</code></td></tr>
+<tr><td><code>]</code></td><td><code>&amp;#93;</code></td></tr>
+</tbody></table>
+</div>
+<p>例如，一个纯文本消息转义前内容如下：</p>
+<pre><code>- [x] 使用 `&amp;data` 获取地址
+</code></pre>
+<p>转义后如下：</p>
+<pre><code>- &amp;#91;x&amp;#93; 使用 `&amp;amp;data` 获取地址
+</code></pre>
+<p>另一方面，CQ 码内部的参数值也可能出现特殊字符，也是需要转义的。由于 <code>,</code>（半角逗号）在 CQ 码中用于分隔参数，因此除了上面的转义规则，还需要对 <code>,</code> 进行转义，如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>转义前</th><th>转义后</th></tr></thead><tbody>
+<tr><td><code>&amp;</code></td><td><code>&amp;amp;</code></td></tr>
+<tr><td><code>[</code></td><td><code>&amp;#91;</code></td></tr>
+<tr><td><code>]</code></td><td><code>&amp;#93;</code></td></tr>
+<tr><td><code>,</code></td><td><code>&amp;#44;</code></td></tr>
+</tbody></table>
+</div>
+<p>例如，一个链接分享消息的 CQ 码可能如下：</p>
+<pre><code>[CQ:share,title=震惊&amp;#44;小伙睡觉前居然...,url=http://baidu.com/?a=1&amp;amp;b=2]
+</code></pre>
+<hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="message/README.html">消息概述</a></td><td><a href="message/array.html">数组格式</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="数组格式"><a class="header" href="#数组格式">数组格式</a></h1>
+<ul>
+<li><a href="message/array.html#%E6%B6%88%E6%81%AF%E6%AE%B5">消息段</a></li>
+<li><a href="message/array.html#%E6%B6%88%E6%81%AF%E6%AE%B5%E6%95%B0%E7%BB%84">消息段数组</a></li>
+</ul>
+<p>数组格式将消息表示为一系列消息段对象的数组，在基本语义上与字符串格式等价，可以相互转换，但数组格式的表达能力更强，例如可以嵌套、规定参数数据类型等。</p>
+<h2 id="消息段"><a class="header" href="#消息段">消息段</a></h2>
+<p>在字符串格式中，使用 CQ 码表示多媒体内容，例如 <code>[CQ:image,file=123.jpg]</code>，这里 CQ 码功能名为 <code>image</code>，参数为 <code>file=123.jpg</code>，也即一个键值对。</p>
+<p>消息段是 CQ 码在数组格式中的表示形式，基本格式如下：</p>
+<pre><code class="language-json">{
+    "type": "image",
+    "data": {
+        "file": "123.jpg"
+    }
+}
+</code></pre>
+<p>其中 <code>type</code> 字段的类型为字符串，对应 CQ 码中的「功能名」；<code>data</code> 字段的类型为对象，对应 CQ 码的「参数」，此字段可为 null。<strong>目前，除了合并转发相关的特殊消息段外，几乎所有消息段参数值类型均为字符串，以支持与 CQ 码的相互转换</strong>。</p>
+<p><strong>由于消息段不会将纯文本和多媒体内容放在一起，也就意味着任意一个字段的值都是真实值，而不再需要转义。</strong></p>
+<p>为了使用消息段表示纯文本，引入一个特殊消息段类型 <code>text</code>，并在 <code>data</code> 中使用 <code>text</code> 字段来指示纯文本内容，例如：</p>
+<pre><code class="language-json">{
+    "type": "text",
+    "data": {
+        "text": "这是一段纯文本"
+    }
+}
+</code></pre>
+<p>在将上面的消息段转成 CQ 码时，将会直接变成纯文本字符串，而不是真的转成 CQ 码。</p>
+<p>更多消息段类型请参考 <a href="message/segment.html">消息段类型</a>。</p>
+<h2 id="消息段数组"><a class="header" href="#消息段数组">消息段数组</a></h2>
+<p>了解了消息段概念之后，就不难理解消息的数组格式了，即消息段组成的数组。</p>
+<p>例如，字符串格式下的这样一条消息：</p>
+<pre><code>&amp;#91;第一部分&amp;#93;[CQ:image,file=123.jpg]图片之后的部分，表情：[CQ:face,id=123]
+</code></pre>
+<p>表示成数组格式即为：</p>
+<pre><code class="language-json">[
+    {
+        "type": "text",
+        "data": {
+            "text": "[第一部分]"
+        }
+    },
+    {
+        "type": "image",
+        "data": {
+            "file": "123.jpg"
+        }
+    },
+    {
+        "type": "text",
+        "data": {
+            "text": "图片之后的部分，表情："
+        }
+    },
+    {
+        "type": "face",
+        "data": {
+            "id": "123"
+        }
+    }
+]
+</code></pre>
+<hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="message/string.html">字符串格式</a></td><td><a href="message/segment.html">消息段类型</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="消息段类型"><a class="header" href="#消息段类型">消息段类型</a></h1>
+<ul>
+<li><a href="message/segment.html#%E7%BA%AF%E6%96%87%E6%9C%AC">纯文本</a></li>
+<li><a href="message/segment.html#qq-%E8%A1%A8%E6%83%85">QQ 表情</a></li>
+<li><a href="message/segment.html#%E5%9B%BE%E7%89%87">图片</a></li>
+<li><a href="message/segment.html#%E8%AF%AD%E9%9F%B3">语音</a></li>
+<li><a href="message/segment.html#%E7%9F%AD%E8%A7%86%E9%A2%91">短视频</a></li>
+<li><a href="message/segment.html#%E6%9F%90%E4%BA%BA">@某人</a></li>
+<li><a href="message/segment.html#%E7%8C%9C%E6%8B%B3%E9%AD%94%E6%B3%95%E8%A1%A8%E6%83%85">猜拳魔法表情</a></li>
+<li><a href="message/segment.html#%E6%8E%B7%E9%AA%B0%E5%AD%90%E9%AD%94%E6%B3%95%E8%A1%A8%E6%83%85">掷骰子魔法表情</a></li>
+<li><a href="message/segment.html#%E7%AA%97%E5%8F%A3%E6%8A%96%E5%8A%A8%E6%88%B3%E4%B8%80%E6%88%B3-badge-text%E5%8F%91">窗口抖动（戳一戳） <Badge text="发"/></a></li>
+<li><a href="message/segment.html#%E6%88%B3%E4%B8%80%E6%88%B3">戳一戳</a></li>
+<li><a href="message/segment.html#%E5%8C%BF%E5%90%8D%E5%8F%91%E6%B6%88%E6%81%AF-badge-text%E5%8F%91">匿名发消息 <Badge text="发"/></a></li>
+<li><a href="message/segment.html#%E9%93%BE%E6%8E%A5%E5%88%86%E4%BA%AB">链接分享</a></li>
+<li><a href="message/segment.html#%E6%8E%A8%E8%8D%90%E5%A5%BD%E5%8F%8B">推荐好友</a></li>
+<li><a href="message/segment.html#%E6%8E%A8%E8%8D%90%E7%BE%A4">推荐群</a></li>
+<li><a href="message/segment.html#%E4%BD%8D%E7%BD%AE">位置</a></li>
+<li><a href="message/segment.html#%E9%9F%B3%E4%B9%90%E5%88%86%E4%BA%AB-badge-text%E5%8F%91">音乐分享 <Badge text="发"/></a></li>
+<li><a href="message/segment.html#%E9%9F%B3%E4%B9%90%E8%87%AA%E5%AE%9A%E4%B9%89%E5%88%86%E4%BA%AB-badge-text%E5%8F%91">音乐自定义分享 <Badge text="发"/></a></li>
+<li><a href="message/segment.html#%E5%9B%9E%E5%A4%8D">回复</a></li>
+<li><a href="message/segment.html#%E5%90%88%E5%B9%B6%E8%BD%AC%E5%8F%91-badge-text%E6%94%B6">合并转发 <Badge text="收"/></a></li>
+<li><a href="message/segment.html#%E5%90%88%E5%B9%B6%E8%BD%AC%E5%8F%91%E8%8A%82%E7%82%B9-badge-text%E5%8F%91">合并转发节点 <Badge text="发"/></a></li>
+<li><a href="message/segment.html#%E5%90%88%E5%B9%B6%E8%BD%AC%E5%8F%91%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8A%82%E7%82%B9">合并转发自定义节点</a></li>
+<li><a href="message/segment.html#xml-%E6%B6%88%E6%81%AF">XML 消息</a></li>
+<li><a href="message/segment.html#json-%E6%B6%88%E6%81%AF">JSON 消息</a></li>
+</ul>
+<p>对于每一种消息段类型，将分别给出消息段格式和 CQ 码格式的例子，然后解释各参数的含义。</p>
+<p>下面所有可能的值为 <code>0</code> 和 <code>1</code> 的参数，也可以使用 <code>no</code> 和 <code>yes</code>、<code>false</code> 和 <code>true</code>。</p>
+<h2 id="纯文本"><a class="header" href="#纯文本">纯文本</a></h2>
+<pre><code class="language-json">{
+    "type": "text",
+    "data": {
+        "text": "纯文本内容"
+    }
+}
+</code></pre>
+<pre><code>纯文本内容
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>text</code></td><td>✓</td><td>✓</td><td>-</td><td>纯文本内容</td></tr>
+</tbody></table>
+</div>
+<h2 id="qq-表情"><a class="header" href="#qq-表情">QQ 表情</a></h2>
+<pre><code class="language-json">{
+    "type": "face",
+    "data": {
+        "id": "123"
+    }
+}
+</code></pre>
+<pre><code>[CQ:face,id=123]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>✓</td><td>✓</td><td>见 <a href="https://github.com/richardchien/coolq-http-api/wiki/%E8%A1%A8%E6%83%85-CQ-%E7%A0%81-ID-%E8%A1%A8">QQ 表情 ID 表</a></td><td>QQ 表情 ID</td></tr>
+</tbody></table>
+</div>
+<h2 id="图片"><a class="header" href="#图片">图片</a></h2>
+<pre><code class="language-json">{
+    "type": "image",
+    "data": {
+        "file": "http://baidu.com/1.jpg"
+    }
+}
+</code></pre>
+<pre><code>[CQ:image,file=http://baidu.com/1.jpg]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>file</code></td><td>✓</td><td>✓<sup>[1]</sup></td><td>-</td><td>图片文件名</td></tr>
+<tr><td><code>type</code></td><td>✓</td><td>✓</td><td><code>flash</code></td><td>图片类型，<code>flash</code> 表示闪照，无此参数表示普通图片</td></tr>
+<tr><td><code>url</code></td><td>✓</td><td></td><td>-</td><td>图片 URL</td></tr>
+<tr><td><code>cache</code></td><td></td><td>✓</td><td><code>0</code> <code>1</code></td><td>只在通过网络 URL 发送时有效，表示是否使用已缓存的文件，默认 <code>1</code></td></tr>
+<tr><td><code>proxy</code></td><td></td><td>✓</td><td><code>0</code> <code>1</code></td><td>只在通过网络 URL 发送时有效，表示是否通过代理下载文件（需通过环境变量或配置文件配置代理），默认 <code>1</code></td></tr>
+<tr><td><code>timeout</code></td><td></td><td>✓</td><td>-</td><td>只在通过网络 URL 发送时有效，单位秒，表示下载网络文件的超时时间，默认不超时</td></tr>
+</tbody></table>
+</div>
+<p>[1] 发送时，<code>file</code> 参数除了支持使用收到的图片文件名直接发送外，还支持：</p>
+<ul>
+<li>绝对路径，例如 <code>file:///C:\\Users\Richard\Pictures\1.png</code>，格式使用 <a href="https://tools.ietf.org/html/rfc8089"><code>file</code> URI</a></li>
+<li>网络 URL，例如 <code>http://i1.piimg.com/567571/fdd6e7b6d93f1ef0.jpg</code></li>
+<li>Base64 编码，例如 <code>base64://iVBORw0KGgoAAAANSUhEUgAAABQAAAAVCAIAAADJt1n/AAAAKElEQVQ4EWPk5+RmIBcwkasRpG9UM4mhNxpgowFGMARGEwnBIEJVAAAdBgBNAZf+QAAAAABJRU5ErkJggg==</code></li>
+</ul>
+<h2 id="语音"><a class="header" href="#语音">语音</a></h2>
+<pre><code class="language-json">{
+    "type": "record",
+    "data": {
+        "file": "http://baidu.com/1.mp3"
+    }
+}
+</code></pre>
+<pre><code>[CQ:record,file=http://baidu.com/1.mp3]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>file</code></td><td>✓</td><td>✓<sup>[1]</sup></td><td>-</td><td>语音文件名</td></tr>
+<tr><td><code>magic</code></td><td>✓</td><td>✓</td><td><code>0</code> <code>1</code></td><td>发送时可选，默认 <code>0</code>，设置为 <code>1</code> 表示变声</td></tr>
+<tr><td><code>url</code></td><td>✓</td><td></td><td>-</td><td>语音 URL</td></tr>
+<tr><td><code>cache</code></td><td></td><td>✓</td><td><code>0</code> <code>1</code></td><td>只在通过网络 URL 发送时有效，表示是否使用已缓存的文件，默认 <code>1</code></td></tr>
+<tr><td><code>proxy</code></td><td></td><td>✓</td><td><code>0</code> <code>1</code></td><td>只在通过网络 URL 发送时有效，表示是否通过代理下载文件（需通过环境变量或配置文件配置代理），默认 <code>1</code></td></tr>
+<tr><td><code>timeout</code></td><td></td><td>✓</td><td>-</td><td>只在通过网络 URL 发送时有效，单位秒，表示下载网络文件的超时时间 ，默认不超时</td></tr>
+</tbody></table>
+</div>
+<p>[1] 发送时，<code>file</code> 参数除了支持使用收到的语音文件名直接发送外，还支持其它形式，参考 <a href="message/segment.html#%E5%9B%BE%E7%89%87">图片</a>。</p>
+<h2 id="短视频"><a class="header" href="#短视频">短视频</a></h2>
+<pre><code class="language-json">{
+    "type": "video",
+    "data": {
+        "file": "http://baidu.com/1.mp4"
+    }
+}
+</code></pre>
+<pre><code>[CQ:video,file=http://baidu.com/1.mp4]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>file</code></td><td>✓</td><td>✓<sup>[1]</sup></td><td>-</td><td>视频文件名</td></tr>
+<tr><td><code>url</code></td><td>✓</td><td></td><td>-</td><td>视频 URL</td></tr>
+<tr><td><code>cache</code></td><td></td><td>✓</td><td><code>0</code> <code>1</code></td><td>只在通过网络 URL 发送时有效，表示是否使用已缓存的文件，默认 <code>1</code></td></tr>
+<tr><td><code>proxy</code></td><td></td><td>✓</td><td><code>0</code> <code>1</code></td><td>只在通过网络 URL 发送时有效，表示是否通过代理下载文件（需通过环境变量或配置文件配置代理），默认 <code>1</code></td></tr>
+<tr><td><code>timeout</code></td><td></td><td>✓</td><td>-</td><td>只在通过网络 URL 发送时有效，单位秒，表示下载网络文件的超时时间 ，默认不超时</td></tr>
+</tbody></table>
+</div>
+<p>[1] 发送时，<code>file</code> 参数除了支持使用收到的视频文件名直接发送外，还支持其它形式，参考 <a href="message/segment.html#%E5%9B%BE%E7%89%87">图片</a>。</p>
+<h2 id="某人"><a class="header" href="#某人">@某人</a></h2>
+<pre><code class="language-json">{
+    "type": "at",
+    "data": {
+        "qq": "10001000"
+    }
+}
+</code></pre>
+<pre><code>[CQ:at,qq=10001000]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>qq</code></td><td>✓</td><td>✓</td><td>QQ 号、<code>all</code></td><td>@的 QQ 号，<code>all</code> 表示全体成员</td></tr>
+</tbody></table>
+</div>
+<h2 id="猜拳魔法表情"><a class="header" href="#猜拳魔法表情">猜拳魔法表情</a></h2>
+<pre><code class="language-json">{
+    "type": "rps",
+    "data": {}
+}
+</code></pre>
+<pre><code>[CQ:rps]
+</code></pre>
+<h2 id="掷骰子魔法表情"><a class="header" href="#掷骰子魔法表情">掷骰子魔法表情</a></h2>
+<pre><code class="language-json">{
+    "type": "dice",
+    "data": {}
+}
+</code></pre>
+<pre><code>[CQ:dice]
+</code></pre>
+<h2 id="窗口抖动戳一戳"><a class="header" href="#窗口抖动戳一戳">窗口抖动（戳一戳） <Badge text="发"/></a></h2>
+<blockquote>
+<p><strong>提示</strong></p>
+<p>相当于戳一戳最基本类型的快捷方式。</p>
+</blockquote>
+<pre><code class="language-json">{
+    "type": "shake",
+    "data": {}
+}
+</code></pre>
+<pre><code>[CQ:shake]
+</code></pre>
+<h2 id="戳一戳"><a class="header" href="#戳一戳">戳一戳</a></h2>
+<pre><code class="language-json">{
+    "type": "poke",
+    "data": {
+        "type": "126",
+        "id": "2003"
+    }
+}
+</code></pre>
+<pre><code>[CQ:poke,type=126,id=2003]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>type</code></td><td>✓</td><td>✓</td><td>见 <a href="https://github.com/mamoe/mirai/blob/f5eefae7ecee84d18a66afce3f89b89fe1584b78/mirai-core/src/commonMain/kotlin/net.mamoe.mirai/message/data/HummerMessage.kt#L49">Mirai 的 PokeMessage 类</a></td><td>类型</td></tr>
+<tr><td><code>id</code></td><td>✓</td><td>✓</td><td>同上</td><td>ID</td></tr>
+<tr><td><code>name</code></td><td>✓</td><td></td><td>同上</td><td>表情名</td></tr>
+</tbody></table>
+</div>
+<h2 id="匿名发消息"><a class="header" href="#匿名发消息">匿名发消息 <Badge text="发"/></a></h2>
+<blockquote>
+<p><strong>提示</strong></p>
+<p>当收到匿名消息时，需要通过 <a href="message/../event/message.html#%E7%BE%A4%E6%B6%88%E6%81%AF">消息事件的群消息</a> 的 <code>anonymous</code> 字段判断。</p>
+</blockquote>
+<pre><code class="language-json">{
+    "type": "anonymous",
+    "data": {}
+}
+</code></pre>
+<pre><code>[CQ:anonymous]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>ignore</code></td><td></td><td>✓</td><td><code>0</code> <code>1</code></td><td>可选，表示无法匿名时是否继续发送</td></tr>
+</tbody></table>
+</div>
+<h2 id="链接分享"><a class="header" href="#链接分享">链接分享</a></h2>
+<pre><code class="language-json">{
+    "type": "share",
+    "data": {
+        "url": "http://baidu.com",
+        "title": "百度"
+    }
+}
+</code></pre>
+<pre><code>[CQ:share,url=http://baidu.com,title=百度]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>url</code></td><td>✓</td><td>✓</td><td>-</td><td>URL</td></tr>
+<tr><td><code>title</code></td><td>✓</td><td>✓</td><td>-</td><td>标题</td></tr>
+<tr><td><code>content</code></td><td>✓</td><td>✓</td><td>-</td><td>发送时可选，内容描述</td></tr>
+<tr><td><code>image</code></td><td>✓</td><td>✓</td><td>-</td><td>发送时可选，图片 URL</td></tr>
+</tbody></table>
+</div>
+<h2 id="推荐好友"><a class="header" href="#推荐好友">推荐好友</a></h2>
+<pre><code class="language-json">{
+    "type": "contact",
+    "data": {
+        "type": "qq",
+        "id": "10001000"
+    }
+}
+</code></pre>
+<pre><code>[CQ:contact,type=qq,id=10001000]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>type</code></td><td>✓</td><td>✓</td><td><code>qq</code></td><td>推荐好友</td></tr>
+<tr><td><code>id</code></td><td>✓</td><td>✓</td><td>-</td><td>被推荐人的 QQ 号</td></tr>
+</tbody></table>
+</div>
+<h2 id="推荐群"><a class="header" href="#推荐群">推荐群</a></h2>
+<pre><code class="language-json">{
+    "type": "contact",
+    "data": {
+        "type": "group",
+        "id": "100100"
+    }
+}
+</code></pre>
+<pre><code>[CQ:contact,type=group,id=100100]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>type</code></td><td>✓</td><td>✓</td><td><code>group</code></td><td>推荐群</td></tr>
+<tr><td><code>id</code></td><td>✓</td><td>✓</td><td>-</td><td>被推荐群的群号</td></tr>
+</tbody></table>
+</div>
+<h2 id="位置"><a class="header" href="#位置">位置</a></h2>
+<pre><code class="language-json">{
+    "type": "location",
+    "data": {
+        "lat": "39.8969426",
+        "lon": "116.3109099"
+    }
+}
+</code></pre>
+<pre><code>[CQ:location,lat=39.8969426,lon=116.3109099]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>lat</code></td><td>✓</td><td>✓</td><td>-</td><td>纬度</td></tr>
+<tr><td><code>lon</code></td><td>✓</td><td>✓</td><td>-</td><td>经度</td></tr>
+<tr><td><code>title</code></td><td>✓</td><td>✓</td><td>-</td><td>发送时可选，标题</td></tr>
+<tr><td><code>content</code></td><td>✓</td><td>✓</td><td>-</td><td>发送时可选，内容描述</td></tr>
+</tbody></table>
+</div>
+<h2 id="音乐分享"><a class="header" href="#音乐分享">音乐分享 <Badge text="发"/></a></h2>
+<pre><code class="language-json">{
+    "type": "music",
+    "data": {
+        "type": "163",
+        "id": "28949129"
+    }
+}
+</code></pre>
+<pre><code>[CQ:music,type=163,id=28949129]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>type</code></td><td></td><td>✓</td><td><code>qq</code> <code>163</code> <code>xm</code></td><td>分别表示使用 QQ 音乐、网易云音乐、虾米音乐</td></tr>
+<tr><td><code>id</code></td><td></td><td>✓</td><td>-</td><td>歌曲 ID</td></tr>
+</tbody></table>
+</div>
+<h2 id="音乐自定义分享"><a class="header" href="#音乐自定义分享">音乐自定义分享 <Badge text="发"/></a></h2>
+<pre><code class="language-json">{
+    "type": "music",
+    "data": {
+        "type": "custom",
+        "url": "http://baidu.com",
+        "audio": "http://baidu.com/1.mp3",
+        "title": "音乐标题"
+    }
+}
+</code></pre>
+<pre><code>[CQ:music,type=custom,url=http://baidu.com,audio=http://baidu.com/1.mp3,title=音乐标题]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>type</code></td><td></td><td>✓</td><td><code>custom</code></td><td>表示音乐自定义分享</td></tr>
+<tr><td><code>url</code></td><td></td><td>✓</td><td>-</td><td>点击后跳转目标 URL</td></tr>
+<tr><td><code>audio</code></td><td></td><td>✓</td><td>-</td><td>音乐 URL</td></tr>
+<tr><td><code>title</code></td><td></td><td>✓</td><td>-</td><td>标题</td></tr>
+<tr><td><code>content</code></td><td></td><td>✓</td><td>-</td><td>发送时可选，内容描述</td></tr>
+<tr><td><code>image</code></td><td></td><td>✓</td><td>-</td><td>发送时可选，图片 URL</td></tr>
+</tbody></table>
+</div>
+<h2 id="回复"><a class="header" href="#回复">回复</a></h2>
+<pre><code class="language-json">{
+    "type": "reply",
+    "data": {
+        "id": "123456"
+    }
+}
+</code></pre>
+<pre><code>[CQ:reply,id=123456]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>✓</td><td>✓</td><td>-</td><td>回复时引用的消息 ID</td></tr>
+</tbody></table>
+</div>
+<h2 id="合并转发"><a class="header" href="#合并转发">合并转发 <Badge text="收"/></a></h2>
+<pre><code class="language-json">{
+    "type": "forward",
+    "data": {
+        "id": "123456"
+    }
+}
+</code></pre>
+<pre><code>[CQ:forward,id=123456]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>✓</td><td></td><td>-</td><td>合并转发 ID，需通过 <a href="message/../api/public.html#get_forward_msg-%E8%8E%B7%E5%8F%96%E5%90%88%E5%B9%B6%E8%BD%AC%E5%8F%91%E6%B6%88%E6%81%AF"><code>get_forward_msg</code> API</a> 获取具体内容</td></tr>
+</tbody></table>
+</div>
+<h2 id="合并转发节点"><a class="header" href="#合并转发节点">合并转发节点 <Badge text="发"/></a></h2>
+<pre><code class="language-json">{
+    "type": "node",
+    "data": {
+        "id": "123456"
+    }
+}
+</code></pre>
+<pre><code>[CQ:node,id=123456]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td></td><td>✓</td><td>-</td><td>转发的消息 ID</td></tr>
+</tbody></table>
+</div>
+<h2 id="合并转发自定义节点"><a class="header" href="#合并转发自定义节点">合并转发自定义节点</a></h2>
+<blockquote>
+<p><strong>注意</strong></p>
+<p>接收时，此消息段不会直接出现在消息事件的 <code>message</code> 中，需通过 <a href="message/../api/public.html#get_forward_msg-%E8%8E%B7%E5%8F%96%E5%90%88%E5%B9%B6%E8%BD%AC%E5%8F%91%E6%B6%88%E6%81%AF"><code>get_forward_msg</code> API</a> 获取。</p>
+</blockquote>
+<p><strong>例 1</strong></p>
+<pre><code class="language-json">{
+    "type": "node",
+    "data": {
+        "user_id": "10001000",
+        "nickname": "某人",
+        "content": "[CQ:face,id=123]哈喽～"
+    }
+}
+</code></pre>
+<pre><code>[CQ:node,user_id=10001000,nickname=某人,content=&amp;#91;CQ:face&amp;#44;id=123&amp;#93;哈喽～]
+</code></pre>
+<p><strong>例 2</strong></p>
+<pre><code class="language-json">{
+    "type": "node",
+    "data": {
+        "user_id": "10001000",
+        "nickname": "某人",
+        "content": [
+            {"type": "face", "data": {"id": "123"}},
+            {"type": "text", "data": {"text": "哈喽～"}}
+        ]
+    }
+}
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>✓</td><td>✓</td><td>-</td><td>发送者 QQ 号</td></tr>
+<tr><td><code>nickname</code></td><td>✓</td><td>✓</td><td>-</td><td>发送者昵称</td></tr>
+<tr><td><code>content</code></td><td>✓</td><td>✓</td><td>-</td><td>消息内容，支持发送消息时的 <code>message</code> 数据类型，见 <a href="message/../api/#%E5%8F%82%E6%95%B0">API 的参数</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="xml-消息"><a class="header" href="#xml-消息">XML 消息</a></h2>
+<pre><code class="language-json">{
+    "type": "xml",
+    "data": {
+        "data": "&lt;?xml ..."
+    }
+}
+</code></pre>
+<pre><code>[CQ:xml,data=&lt;?xml ...]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>data</code></td><td>✓</td><td>✓</td><td>-</td><td>XML 内容</td></tr>
+</tbody></table>
+</div>
+<h2 id="json-消息"><a class="header" href="#json-消息">JSON 消息</a></h2>
+<pre><code class="language-json">{
+    "type": "json",
+    "data": {
+        "data": "{\"app\": ..."
+    }
+}
+</code></pre>
+<pre><code>[CQ:json,data={"app": ...]
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>参数名</th><th>收</th><th>发</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>data</code></td><td>✓</td><td>✓</td><td>-</td><td>JSON 内容</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="message/array.html">数组格式</a></td><td><a href="message/../api/README.html">API 概述</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="api"><a class="header" href="#api">API</a></h1>
+<ul>
+<li><a href="api/index.html#%E5%8F%82%E6%95%B0">参数</a></li>
+<li><a href="api/index.html#%E5%93%8D%E5%BA%94">响应</a></li>
+<li><a href="api/index.html#%E5%BC%82%E6%AD%A5%E8%B0%83%E7%94%A8">异步调用</a></li>
+<li><a href="api/index.html#%E9%99%90%E9%80%9F%E8%B0%83%E7%94%A8">限速调用</a></li>
+<li><a href="api/index.html#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE">相关配置</a></li>
+</ul>
+<p>API 是 OneBot 向用户提供的操作接口，用户可通过 HTTP 请求或 WebSocket 消息等方式调用 API。</p>
+<h2 id="参数"><a class="header" href="#参数">参数</a></h2>
+<p>API 调用需要指定 action（要进行的动作）和动作所需的参数。</p>
+<p>在后面的 API 描述中，action 在标题中给出，如 <code>send_private_msg</code>；参数在「参数」小标题下给出，其中「数据类型」使用 JSON 中的名字，例如 <code>string</code>、<code>number</code> 等。</p>
+<p>特别地，数据类型 <code>message</code> 表示该参数是一个消息类型的参数，在调用 API 时，<code>message</code> 类型的参数允许接受字符串、消息段数组、单个消息段对象三种类型的数据，关于消息格式的更多细节请查看 <a href="api/../message/">消息</a>。</p>
+<h2 id="响应-1"><a class="header" href="#响应-1">响应</a></h2>
+<p>OneBot 会对每个 API 调用返回一个 JSON 响应（除非是 HTTP 状态码不为 200 的情况），响应中的 <code>data</code> 字段包含 API 调用返回的数据内容。在后面的 API 描述中，将只给出 <code>data</code> 字段的内容，放在「响应数据」小标题下，而不再赘述 <code>status</code>、<code>retcode</code> 字段。</p>
+<h2 id="异步调用"><a class="header" href="#异步调用">异步调用</a></h2>
+<p>所有 API 都可以通过给 action 附加后缀 <code>_async</code> 来进行异步调用，例如 <code>send_private_msg_async</code>、<code>send_msg_async</code>、<code>clean_data_dir_async</code>。</p>
+<p>异步调用的响应中，<code>status</code> 字段为 <code>async</code>。</p>
+<p>需要注意的是，虽然说以 <code>get_</code> 开头的那些接口也可以进行异步调用，但实际上客户端没有办法得知最终的调用结果，所以对这部分接口进行异步调用是没有意义的；另外，有一些接口本身就是异步执行的（返回的 <code>status</code> 为 <code>async</code>），此时使用 <code>_async</code> 后缀来调用不会产生本质上的区别。</p>
+<h2 id="限速调用"><a class="header" href="#限速调用">限速调用</a></h2>
+<p>所有 API 都可以通过给 action 附加后缀 <code>_rate_limited</code> 来进行限速调用，例如 <code>send_private_msg_rate_limited</code>、<code>send_msg_rate_limited</code>，不过主要还是用在发送消息接口上，以避免消息频率过快导致腾讯封号。所有限速调用将会以指定速度<strong>排队执行</strong>，这个速度可在配置中指定。</p>
+<p>限速调用的响应中，<code>status</code> 字段为 <code>async</code>。</p>
+<h2 id="相关配置-5"><a class="header" href="#相关配置-5">相关配置</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>配置项</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>api.rate_limit_interval</code></td><td><code>500</code></td><td>限速 API 调用的排队间隔时间，单位毫秒</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="api/../message/segment.html">消息段类型</a></td><td><a href="api/public.html">公开 API</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="公开-api"><a class="header" href="#公开-api">公开 API</a></h1>
+<ul>
+<li><a href="api/public.html#send_private_msg-%E5%8F%91%E9%80%81%E7%A7%81%E8%81%8A%E6%B6%88%E6%81%AF"><code>send_private_msg</code> 发送私聊消息</a></li>
+<li><a href="api/public.html#send_group_msg-%E5%8F%91%E9%80%81%E7%BE%A4%E6%B6%88%E6%81%AF"><code>send_group_msg</code> 发送群消息</a></li>
+<li><a href="api/public.html#send_msg-%E5%8F%91%E9%80%81%E6%B6%88%E6%81%AF"><code>send_msg</code> 发送消息</a></li>
+<li><a href="api/public.html#delete_msg-%E6%92%A4%E5%9B%9E%E6%B6%88%E6%81%AF"><code>delete_msg</code> 撤回消息</a></li>
+<li><a href="api/public.html#get_msg-%E8%8E%B7%E5%8F%96%E6%B6%88%E6%81%AF"><code>get_msg</code> 获取消息</a></li>
+<li><a href="api/public.html#get_forward_msg-%E8%8E%B7%E5%8F%96%E5%90%88%E5%B9%B6%E8%BD%AC%E5%8F%91%E6%B6%88%E6%81%AF"><code>get_forward_msg</code> 获取合并转发消息</a></li>
+<li><a href="api/public.html#send_like-%E5%8F%91%E9%80%81%E5%A5%BD%E5%8F%8B%E8%B5%9E"><code>send_like</code> 发送好友赞</a></li>
+<li><a href="api/public.html#set_group_kick-%E7%BE%A4%E7%BB%84%E8%B8%A2%E4%BA%BA"><code>set_group_kick</code> 群组踢人</a></li>
+<li><a href="api/public.html#set_group_ban-%E7%BE%A4%E7%BB%84%E5%8D%95%E4%BA%BA%E7%A6%81%E8%A8%80"><code>set_group_ban</code> 群组单人禁言</a></li>
+<li><a href="api/public.html#set_group_anonymous_ban-%E7%BE%A4%E7%BB%84%E5%8C%BF%E5%90%8D%E7%94%A8%E6%88%B7%E7%A6%81%E8%A8%80"><code>set_group_anonymous_ban</code> 群组匿名用户禁言</a></li>
+<li><a href="api/public.html#set_group_whole_ban-%E7%BE%A4%E7%BB%84%E5%85%A8%E5%91%98%E7%A6%81%E8%A8%80"><code>set_group_whole_ban</code> 群组全员禁言</a></li>
+<li><a href="api/public.html#set_group_admin-%E7%BE%A4%E7%BB%84%E8%AE%BE%E7%BD%AE%E7%AE%A1%E7%90%86%E5%91%98"><code>set_group_admin</code> 群组设置管理员</a></li>
+<li><a href="api/public.html#set_group_anonymous-%E7%BE%A4%E7%BB%84%E5%8C%BF%E5%90%8D"><code>set_group_anonymous</code> 群组匿名</a></li>
+<li><a href="api/public.html#set_group_card-%E8%AE%BE%E7%BD%AE%E7%BE%A4%E5%90%8D%E7%89%87%E7%BE%A4%E5%A4%87%E6%B3%A8"><code>set_group_card</code> 设置群名片（群备注）</a></li>
+<li><a href="api/public.html#set_group_name-%E8%AE%BE%E7%BD%AE%E7%BE%A4%E5%90%8D"><code>set_group_name</code> 设置群名</a></li>
+<li><a href="api/public.html#set_group_leave-%E9%80%80%E5%87%BA%E7%BE%A4%E7%BB%84"><code>set_group_leave</code> 退出群组</a></li>
+<li><a href="api/public.html#set_group_special_title-%E8%AE%BE%E7%BD%AE%E7%BE%A4%E7%BB%84%E4%B8%93%E5%B1%9E%E5%A4%B4%E8%A1%94"><code>set_group_special_title</code> 设置群组专属头衔</a></li>
+<li><a href="api/public.html#set_friend_add_request-%E5%A4%84%E7%90%86%E5%8A%A0%E5%A5%BD%E5%8F%8B%E8%AF%B7%E6%B1%82"><code>set_friend_add_request</code> 处理加好友请求</a></li>
+<li><a href="api/public.html#set_group_add_request-%E5%A4%84%E7%90%86%E5%8A%A0%E7%BE%A4%E8%AF%B7%E6%B1%82%E9%82%80%E8%AF%B7"><code>set_group_add_request</code> 处理加群请求／邀请</a></li>
+<li><a href="api/public.html#get_login_info-%E8%8E%B7%E5%8F%96%E7%99%BB%E5%BD%95%E5%8F%B7%E4%BF%A1%E6%81%AF"><code>get_login_info</code> 获取登录号信息</a></li>
+<li><a href="api/public.html#get_stranger_info-%E8%8E%B7%E5%8F%96%E9%99%8C%E7%94%9F%E4%BA%BA%E4%BF%A1%E6%81%AF"><code>get_stranger_info</code> 获取陌生人信息</a></li>
+<li><a href="api/public.html#get_friend_list-%E8%8E%B7%E5%8F%96%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8"><code>get_friend_list</code> 获取好友列表</a></li>
+<li><a href="api/public.html#get_group_info-%E8%8E%B7%E5%8F%96%E7%BE%A4%E4%BF%A1%E6%81%AF"><code>get_group_info</code> 获取群信息</a></li>
+<li><a href="api/public.html#get_group_list-%E8%8E%B7%E5%8F%96%E7%BE%A4%E5%88%97%E8%A1%A8"><code>get_group_list</code> 获取群列表</a></li>
+<li><a href="api/public.html#get_group_member_info-%E8%8E%B7%E5%8F%96%E7%BE%A4%E6%88%90%E5%91%98%E4%BF%A1%E6%81%AF"><code>get_group_member_info</code> 获取群成员信息</a></li>
+<li><a href="api/public.html#get_group_member_list-%E8%8E%B7%E5%8F%96%E7%BE%A4%E6%88%90%E5%91%98%E5%88%97%E8%A1%A8"><code>get_group_member_list</code> 获取群成员列表</a></li>
+<li><a href="api/public.html#get_group_honor_info-%E8%8E%B7%E5%8F%96%E7%BE%A4%E8%8D%A3%E8%AA%89%E4%BF%A1%E6%81%AF"><code>get_group_honor_info</code> 获取群荣誉信息</a></li>
+<li><a href="api/public.html#get_cookies-%E8%8E%B7%E5%8F%96-cookies"><code>get_cookies</code> 获取 Cookies</a></li>
+<li><a href="api/public.html#get_csrf_token-%E8%8E%B7%E5%8F%96-csrf-token"><code>get_csrf_token</code> 获取 CSRF Token</a></li>
+<li><a href="api/public.html#get_credentials-%E8%8E%B7%E5%8F%96-qq-%E7%9B%B8%E5%85%B3%E6%8E%A5%E5%8F%A3%E5%87%AD%E8%AF%81"><code>get_credentials</code> 获取 QQ 相关接口凭证</a></li>
+<li><a href="api/public.html#get_record-%E8%8E%B7%E5%8F%96%E8%AF%AD%E9%9F%B3"><code>get_record</code> 获取语音</a></li>
+<li><a href="api/public.html#get_image-%E8%8E%B7%E5%8F%96%E5%9B%BE%E7%89%87"><code>get_image</code> 获取图片</a></li>
+<li><a href="api/public.html#can_send_image-%E6%A3%80%E6%9F%A5%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E5%8F%91%E9%80%81%E5%9B%BE%E7%89%87"><code>can_send_image</code> 检查是否可以发送图片</a></li>
+<li><a href="api/public.html#can_send_record-%E6%A3%80%E6%9F%A5%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E5%8F%91%E9%80%81%E8%AF%AD%E9%9F%B3"><code>can_send_record</code> 检查是否可以发送语音</a></li>
+<li><a href="api/public.html#get_status-%E8%8E%B7%E5%8F%96%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><code>get_status</code> 获取运行状态</a></li>
+<li><a href="api/public.html#get_version_info-%E8%8E%B7%E5%8F%96%E7%89%88%E6%9C%AC%E4%BF%A1%E6%81%AF"><code>get_version_info</code> 获取版本信息</a></li>
+<li><a href="api/public.html#set_restart-%E9%87%8D%E5%90%AF-onebot-%E5%AE%9E%E7%8E%B0"><code>set_restart</code> 重启 OneBot 实现</a></li>
+<li><a href="api/public.html#clean_cache-%E6%B8%85%E7%90%86%E7%BC%93%E5%AD%98"><code>clean_cache</code> 清理缓存</a></li>
+</ul>
+<h2 id="send_private_msg-发送私聊消息"><a class="header" href="#send_private_msg-发送私聊消息"><code>send_private_msg</code> 发送私聊消息</a></h2>
+<h3 id="参数-1"><a class="header" href="#参数-1">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>对方 QQ 号</td></tr>
+<tr><td><code>message</code></td><td>message</td><td>-</td><td>要发送的内容</td></tr>
+<tr><td><code>auto_escape</code></td><td>boolean</td><td><code>false</code></td><td>消息内容是否作为纯文本发送（即不解析 CQ 码），只在 <code>message</code> 字段是字符串时有效</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据"><a class="header" href="#响应数据">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>message_id</code></td><td>number (int32)</td><td>消息 ID</td></tr>
+</tbody></table>
+</div>
+<h2 id="send_group_msg-发送群消息"><a class="header" href="#send_group_msg-发送群消息"><code>send_group_msg</code> 发送群消息</a></h2>
+<h3 id="参数-2"><a class="header" href="#参数-2">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>message</code></td><td>message</td><td>-</td><td>要发送的内容</td></tr>
+<tr><td><code>auto_escape</code></td><td>boolean</td><td><code>false</code></td><td>消息内容是否作为纯文本发送（即不解析 CQ 码），只在 <code>message</code> 字段是字符串时有效</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-1"><a class="header" href="#响应数据-1">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>message_id</code></td><td>number (int32)</td><td>消息 ID</td></tr>
+</tbody></table>
+</div>
+<h2 id="send_msg-发送消息"><a class="header" href="#send_msg-发送消息"><code>send_msg</code> 发送消息</a></h2>
+<h3 id="参数-3"><a class="header" href="#参数-3">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>message_type</code></td><td>string</td><td>-</td><td>消息类型，支持 <code>private</code>、<code>group</code>，分别对应私聊、群组，如不传入，则根据传入的 <code>*_id</code> 参数判断</td></tr>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>对方 QQ 号（消息类型为 <code>private</code> 时需要）</td></tr>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号（消息类型为 <code>group</code> 时需要）</td></tr>
+<tr><td><code>message</code></td><td>message</td><td>-</td><td>要发送的内容</td></tr>
+<tr><td><code>auto_escape</code></td><td>boolean</td><td><code>false</code></td><td>消息内容是否作为纯文本发送（即不解析 CQ 码），只在 <code>message</code> 字段是字符串时有效</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-2"><a class="header" href="#响应数据-2">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>message_id</code></td><td>number (int32)</td><td>消息 ID</td></tr>
+</tbody></table>
+</div>
+<h2 id="delete_msg-撤回消息"><a class="header" href="#delete_msg-撤回消息"><code>delete_msg</code> 撤回消息</a></h2>
+<h3 id="参数-4"><a class="header" href="#参数-4">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>message_id</code></td><td>number (int32)</td><td>-</td><td>消息 ID</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-3"><a class="header" href="#响应数据-3">响应数据</a></h3>
+<p>无</p>
+<h2 id="get_msg-获取消息"><a class="header" href="#get_msg-获取消息"><code>get_msg</code> 获取消息</a></h2>
+<h3 id="参数-5"><a class="header" href="#参数-5">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>message_id</code></td><td>number (int32)</td><td>消息 ID</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-4"><a class="header" href="#响应数据-4">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int32)</td><td>发送时间</td></tr>
+<tr><td><code>message_type</code></td><td>string</td><td>消息类型，同 <a href="api/../event/message.html">消息事件</a></td></tr>
+<tr><td><code>message_id</code></td><td>number (int32)</td><td>消息 ID</td></tr>
+<tr><td><code>real_id</code></td><td>number (int32)</td><td>消息真实 ID</td></tr>
+<tr><td><code>sender</code></td><td>object</td><td>发送人信息，同 <a href="api/../event/message.html">消息事件</a></td></tr>
+<tr><td><code>message</code></td><td>message</td><td>消息内容</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_forward_msg-获取合并转发消息"><a class="header" href="#get_forward_msg-获取合并转发消息"><code>get_forward_msg</code> 获取合并转发消息</a></h2>
+<h3 id="参数-6"><a class="header" href="#参数-6">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>string</td><td>合并转发 ID</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-5"><a class="header" href="#响应数据-5">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>message</code></td><td>message</td><td>消息内容，使用 <a href="api/../message/array.html">消息的数组格式</a> 表示，数组中的消息段全部为 <a href="api/../message/segment.html#%E5%90%88%E5%B9%B6%E8%BD%AC%E5%8F%91%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8A%82%E7%82%B9"><code>node</code> 消息段</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="send_like-发送好友赞"><a class="header" href="#send_like-发送好友赞"><code>send_like</code> 发送好友赞</a></h2>
+<h3 id="参数-7"><a class="header" href="#参数-7">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>对方 QQ 号</td></tr>
+<tr><td><code>times</code></td><td>number</td><td>1</td><td>赞的次数，每个好友每天最多 10 次</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-6"><a class="header" href="#响应数据-6">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_kick-群组踢人"><a class="header" href="#set_group_kick-群组踢人"><code>set_group_kick</code> 群组踢人</a></h2>
+<h3 id="参数-8"><a class="header" href="#参数-8">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>要踢的 QQ 号</td></tr>
+<tr><td><code>reject_add_request</code></td><td>boolean</td><td><code>false</code></td><td>拒绝此人的加群请求</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-7"><a class="header" href="#响应数据-7">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_ban-群组单人禁言"><a class="header" href="#set_group_ban-群组单人禁言"><code>set_group_ban</code> 群组单人禁言</a></h2>
+<h3 id="参数-9"><a class="header" href="#参数-9">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>要禁言的 QQ 号</td></tr>
+<tr><td><code>duration</code></td><td>number</td><td><code>30 * 60</code></td><td>禁言时长，单位秒，0 表示取消禁言</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-8"><a class="header" href="#响应数据-8">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_anonymous_ban-群组匿名用户禁言"><a class="header" href="#set_group_anonymous_ban-群组匿名用户禁言"><code>set_group_anonymous_ban</code> 群组匿名用户禁言</a></h2>
+<h3 id="参数-10"><a class="header" href="#参数-10">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>anonymous</code></td><td>object</td><td>-</td><td>可选，要禁言的匿名用户对象（群消息上报的 <code>anonymous</code> 字段）</td></tr>
+<tr><td><code>anonymous_flag</code> 或 <code>flag</code></td><td>string</td><td>-</td><td>可选，要禁言的匿名用户的 flag（需从群消息上报的数据中获得）</td></tr>
+<tr><td><code>duration</code></td><td>number</td><td><code>30 * 60</code></td><td>禁言时长，单位秒，无法取消匿名用户禁言</td></tr>
+</tbody></table>
+</div>
+<p>上面的 <code>anonymous</code> 和 <code>anonymous_flag</code> 两者任选其一传入即可，若都传入，则使用 <code>anonymous</code>。</p>
+<h3 id="响应数据-9"><a class="header" href="#响应数据-9">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_whole_ban-群组全员禁言"><a class="header" href="#set_group_whole_ban-群组全员禁言"><code>set_group_whole_ban</code> 群组全员禁言</a></h2>
+<h3 id="参数-11"><a class="header" href="#参数-11">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>enable</code></td><td>boolean</td><td><code>true</code></td><td>是否禁言</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-10"><a class="header" href="#响应数据-10">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_admin-群组设置管理员"><a class="header" href="#set_group_admin-群组设置管理员"><code>set_group_admin</code> 群组设置管理员</a></h2>
+<h3 id="参数-12"><a class="header" href="#参数-12">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>要设置管理员的 QQ 号</td></tr>
+<tr><td><code>enable</code></td><td>boolean</td><td><code>true</code></td><td>true 为设置，false 为取消</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-11"><a class="header" href="#响应数据-11">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_anonymous-群组匿名"><a class="header" href="#set_group_anonymous-群组匿名"><code>set_group_anonymous</code> 群组匿名</a></h2>
+<h3 id="参数-13"><a class="header" href="#参数-13">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>enable</code></td><td>boolean</td><td><code>true</code></td><td>是否允许匿名聊天</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-12"><a class="header" href="#响应数据-12">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_card-设置群名片群备注"><a class="header" href="#set_group_card-设置群名片群备注"><code>set_group_card</code> 设置群名片（群备注）</a></h2>
+<h3 id="参数-14"><a class="header" href="#参数-14">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>要设置的 QQ 号</td></tr>
+<tr><td><code>card</code></td><td>string</td><td>空</td><td>群名片内容，不填或空字符串表示删除群名片</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-13"><a class="header" href="#响应数据-13">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_name-设置群名"><a class="header" href="#set_group_name-设置群名"><code>set_group_name</code> 设置群名</a></h2>
+<h3 id="参数-15"><a class="header" href="#参数-15">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>群号</td></tr>
+<tr><td><code>group_name</code></td><td>string</td><td>新群名</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-14"><a class="header" href="#响应数据-14">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_leave-退出群组"><a class="header" href="#set_group_leave-退出群组"><code>set_group_leave</code> 退出群组</a></h2>
+<h3 id="参数-16"><a class="header" href="#参数-16">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>is_dismiss</code></td><td>boolean</td><td><code>false</code></td><td>是否解散，如果登录号是群主，则仅在此项为 true 时能够解散</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-15"><a class="header" href="#响应数据-15">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_special_title-设置群组专属头衔"><a class="header" href="#set_group_special_title-设置群组专属头衔"><code>set_group_special_title</code> 设置群组专属头衔</a></h2>
+<h3 id="参数-17"><a class="header" href="#参数-17">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>要设置的 QQ 号</td></tr>
+<tr><td><code>special_title</code></td><td>string</td><td>空</td><td>专属头衔，不填或空字符串表示删除专属头衔</td></tr>
+<tr><td><code>duration</code></td><td>number</td><td><code>-1</code></td><td>专属头衔有效期，单位秒，-1 表示永久，不过此项似乎没有效果，可能是只有某些特殊的时间长度有效，有待测试</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-16"><a class="header" href="#响应数据-16">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_friend_add_request-处理加好友请求"><a class="header" href="#set_friend_add_request-处理加好友请求"><code>set_friend_add_request</code> 处理加好友请求</a></h2>
+<h3 id="参数-18"><a class="header" href="#参数-18">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>flag</code></td><td>string</td><td>-</td><td>加好友请求的 flag（需从上报的数据中获得）</td></tr>
+<tr><td><code>approve</code></td><td>boolean</td><td><code>true</code></td><td>是否同意请求</td></tr>
+<tr><td><code>remark</code></td><td>string</td><td>空</td><td>添加后的好友备注（仅在同意时有效）</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-17"><a class="header" href="#响应数据-17">响应数据</a></h3>
+<p>无</p>
+<h2 id="set_group_add_request-处理加群请求邀请"><a class="header" href="#set_group_add_request-处理加群请求邀请"><code>set_group_add_request</code> 处理加群请求／邀请</a></h2>
+<h3 id="参数-19"><a class="header" href="#参数-19">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>flag</code></td><td>string</td><td>-</td><td>加群请求的 flag（需从上报的数据中获得）</td></tr>
+<tr><td><code>sub_type</code> 或 <code>type</code></td><td>string</td><td>-</td><td><code>add</code> 或 <code>invite</code>，请求类型（需要和上报消息中的 <code>sub_type</code> 字段相符）</td></tr>
+<tr><td><code>approve</code></td><td>boolean</td><td><code>true</code></td><td>是否同意请求／邀请</td></tr>
+<tr><td><code>reason</code></td><td>string</td><td>空</td><td>拒绝理由（仅在拒绝时有效）</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-18"><a class="header" href="#响应数据-18">响应数据</a></h3>
+<p>无</p>
+<h2 id="get_login_info-获取登录号信息"><a class="header" href="#get_login_info-获取登录号信息"><code>get_login_info</code> 获取登录号信息</a></h2>
+<h3 id="参数-20"><a class="header" href="#参数-20">参数</a></h3>
+<p>无</p>
+<h3 id="响应数据-19"><a class="header" href="#响应数据-19">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>QQ 号</td></tr>
+<tr><td><code>nickname</code></td><td>string</td><td>QQ 昵称</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_stranger_info-获取陌生人信息"><a class="header" href="#get_stranger_info-获取陌生人信息"><code>get_stranger_info</code> 获取陌生人信息</a></h2>
+<h3 id="参数-21"><a class="header" href="#参数-21">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>QQ 号</td></tr>
+<tr><td><code>no_cache</code></td><td>boolean</td><td><code>false</code></td><td>是否不使用缓存（使用缓存可能更新不及时，但响应更快）</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-20"><a class="header" href="#响应数据-20">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>QQ 号</td></tr>
+<tr><td><code>nickname</code></td><td>string</td><td>昵称</td></tr>
+<tr><td><code>sex</code></td><td>string</td><td>性别，<code>male</code> 或 <code>female</code> 或 <code>unknown</code></td></tr>
+<tr><td><code>age</code></td><td>number (int32)</td><td>年龄</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_friend_list-获取好友列表"><a class="header" href="#get_friend_list-获取好友列表"><code>get_friend_list</code> 获取好友列表</a></h2>
+<h3 id="参数-22"><a class="header" href="#参数-22">参数</a></h3>
+<p>无</p>
+<h3 id="响应数据-21"><a class="header" href="#响应数据-21">响应数据</a></h3>
+<p>响应内容为 JSON 数组，每个元素如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>QQ 号</td></tr>
+<tr><td><code>nickname</code></td><td>string</td><td>昵称</td></tr>
+<tr><td><code>remark</code></td><td>string</td><td>备注名</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_group_info-获取群信息"><a class="header" href="#get_group_info-获取群信息"><code>get_group_info</code> 获取群信息</a></h2>
+<h3 id="参数-23"><a class="header" href="#参数-23">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>no_cache</code></td><td>boolean</td><td><code>false</code></td><td>是否不使用缓存（使用缓存可能更新不及时，但响应更快）</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-22"><a class="header" href="#响应数据-22">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>群号</td></tr>
+<tr><td><code>group_name</code></td><td>string</td><td>群名称</td></tr>
+<tr><td><code>member_count</code></td><td>number (int32)</td><td>成员数</td></tr>
+<tr><td><code>max_member_count</code></td><td>number (int32)</td><td>最大成员数（群容量）</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_group_list-获取群列表"><a class="header" href="#get_group_list-获取群列表"><code>get_group_list</code> 获取群列表</a></h2>
+<h3 id="参数-24"><a class="header" href="#参数-24">参数</a></h3>
+<p>无</p>
+<h3 id="响应数据-23"><a class="header" href="#响应数据-23">响应数据</a></h3>
+<p>响应内容为 JSON 数组，每个元素和上面的 <code>get_group_info</code> 接口相同。</p>
+<h2 id="get_group_member_info-获取群成员信息"><a class="header" href="#get_group_member_info-获取群成员信息"><code>get_group_member_info</code> 获取群成员信息</a></h2>
+<h3 id="参数-25"><a class="header" href="#参数-25">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number</td><td>-</td><td>QQ 号</td></tr>
+<tr><td><code>no_cache</code></td><td>boolean</td><td><code>false</code></td><td>是否不使用缓存（使用缓存可能更新不及时，但响应更快）</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-24"><a class="header" href="#响应数据-24">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>QQ 号</td></tr>
+<tr><td><code>nickname</code></td><td>string</td><td>昵称</td></tr>
+<tr><td><code>card</code></td><td>string</td><td>群名片／备注</td></tr>
+<tr><td><code>sex</code></td><td>string</td><td>性别，<code>male</code> 或 <code>female</code> 或 <code>unknown</code></td></tr>
+<tr><td><code>age</code></td><td>number (int32)</td><td>年龄</td></tr>
+<tr><td><code>area</code></td><td>string</td><td>地区</td></tr>
+<tr><td><code>join_time</code></td><td>number (int32)</td><td>加群时间戳</td></tr>
+<tr><td><code>last_sent_time</code></td><td>number (int32)</td><td>最后发言时间戳</td></tr>
+<tr><td><code>level</code></td><td>string</td><td>成员等级</td></tr>
+<tr><td><code>role</code></td><td>string</td><td>角色，<code>owner</code> 或 <code>admin</code> 或 <code>member</code></td></tr>
+<tr><td><code>unfriendly</code></td><td>boolean</td><td>是否不良记录成员</td></tr>
+<tr><td><code>title</code></td><td>string</td><td>专属头衔</td></tr>
+<tr><td><code>title_expire_time</code></td><td>number (int32)</td><td>专属头衔过期时间戳</td></tr>
+<tr><td><code>card_changeable</code></td><td>boolean</td><td>是否允许修改群名片</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_group_member_list-获取群成员列表"><a class="header" href="#get_group_member_list-获取群成员列表"><code>get_group_member_list</code> 获取群成员列表</a></h2>
+<h3 id="参数-26"><a class="header" href="#参数-26">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>-</td><td>群号</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-25"><a class="header" href="#响应数据-25">响应数据</a></h3>
+<p>响应内容为 JSON 数组，每个元素的内容和上面的 <code>get_group_member_info</code> 接口相同，但对于同一个群组的同一个成员，获取列表时和获取单独的成员信息时，某些字段可能有所不同，例如 <code>area</code>、<code>title</code> 等字段在获取列表时无法获得，具体应以单独的成员信息为准。</p>
+<h2 id="get_group_honor_info-获取群荣誉信息"><a class="header" href="#get_group_honor_info-获取群荣誉信息"><code>get_group_honor_info</code> 获取群荣誉信息</a></h2>
+<h3 id="参数-27"><a class="header" href="#参数-27">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>-</td><td>群号</td></tr>
+<tr><td><code>type</code></td><td>string</td><td>-</td><td>要获取的群荣誉类型，可传入 <code>talkative</code> <code>performer</code> <code>legend</code> <code>strong_newbie</code> <code>emotion</code> 以分别获取单个类型的群荣誉数据，或传入 <code>all</code> 获取所有数据</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-26"><a class="header" href="#响应数据-26">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>群号</td></tr>
+<tr><td><code>current_talkative</code></td><td>object</td><td>当前龙王，仅 <code>type</code> 为 <code>talkative</code> 或 <code>all</code> 时有数据</td></tr>
+<tr><td><code>talkative_list</code></td><td>array</td><td>历史龙王，仅 <code>type</code> 为 <code>talkative</code> 或 <code>all</code> 时有数据</td></tr>
+<tr><td><code>performer_list</code></td><td>array</td><td>群聊之火，仅 <code>type</code> 为 <code>performer</code> 或 <code>all</code> 时有数据</td></tr>
+<tr><td><code>legend_list</code></td><td>array</td><td>群聊炽焰，仅 <code>type</code> 为 <code>legend</code> 或 <code>all</code> 时有数据</td></tr>
+<tr><td><code>strong_newbie_list</code></td><td>array</td><td>冒尖小春笋，仅 <code>type</code> 为 <code>strong_newbie</code> 或 <code>all</code> 时有数据</td></tr>
+<tr><td><code>emotion_list</code></td><td>array</td><td>快乐之源，仅 <code>type</code> 为 <code>emotion</code> 或 <code>all</code> 时有数据</td></tr>
+</tbody></table>
+</div>
+<p>其中 <code>current_talkative</code> 字段的内容如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>QQ 号</td></tr>
+<tr><td><code>nickname</code></td><td>string</td><td>昵称</td></tr>
+<tr><td><code>avatar</code></td><td>string</td><td>头像 URL</td></tr>
+<tr><td><code>day_count</code></td><td>number (int32)</td><td>持续天数</td></tr>
+</tbody></table>
+</div>
+<p>其它各 <code>*_list</code> 的每个元素是一个 JSON 对象，内容如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>QQ 号</td></tr>
+<tr><td><code>nickname</code></td><td>string</td><td>昵称</td></tr>
+<tr><td><code>avatar</code></td><td>string</td><td>头像 URL</td></tr>
+<tr><td><code>description</code></td><td>string</td><td>荣誉描述</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_cookies-获取-cookies"><a class="header" href="#get_cookies-获取-cookies"><code>get_cookies</code> 获取 Cookies</a></h2>
+<h3 id="参数-28"><a class="header" href="#参数-28">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>domain</code></td><td>string</td><td>空</td><td>需要获取 cookies 的域名</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-27"><a class="header" href="#响应数据-27">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>cookies</code></td><td>string</td><td>Cookies</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_csrf_token-获取-csrf-token"><a class="header" href="#get_csrf_token-获取-csrf-token"><code>get_csrf_token</code> 获取 CSRF Token</a></h2>
+<h3 id="参数-29"><a class="header" href="#参数-29">参数</a></h3>
+<p>无</p>
+<h3 id="响应数据-28"><a class="header" href="#响应数据-28">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>token</code></td><td>number (int32)</td><td>CSRF Token</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_credentials-获取-qq-相关接口凭证"><a class="header" href="#get_credentials-获取-qq-相关接口凭证"><code>get_credentials</code> 获取 QQ 相关接口凭证</a></h2>
+<p>即上面两个接口的合并。</p>
+<h3 id="参数-30"><a class="header" href="#参数-30">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>domain</code></td><td>string</td><td>空</td><td>需要获取 cookies 的域名</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-29"><a class="header" href="#响应数据-29">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>cookies</code></td><td>string</td><td>Cookies</td></tr>
+<tr><td><code>csrf_token</code></td><td>number (int32)</td><td>CSRF Token</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_record-获取语音"><a class="header" href="#get_record-获取语音"><code>get_record</code> 获取语音</a></h2>
+<blockquote>
+<p><strong>提示</strong>：要使用此接口，通常需要安装 ffmpeg，请参考 OneBot 实现的相关说明。</p>
+</blockquote>
+<h3 id="参数-31"><a class="header" href="#参数-31">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>file</code></td><td>string</td><td>-</td><td>收到的语音文件名（消息段的 <code>file</code> 参数），如 <code>0B38145AA44505000B38145AA4450500.silk</code></td></tr>
+<tr><td><code>out_format</code></td><td>string</td><td>-</td><td>要转换到的格式，目前支持 <code>mp3</code>、<code>amr</code>、<code>wma</code>、<code>m4a</code>、<code>spx</code>、<code>ogg</code>、<code>wav</code>、<code>flac</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-30"><a class="header" href="#响应数据-30">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>file</code></td><td>string</td><td>转换后的语音文件路径，如 <code>/home/somebody/cqhttp/data/record/0B38145AA44505000B38145AA4450500.mp3</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="get_image-获取图片"><a class="header" href="#get_image-获取图片"><code>get_image</code> 获取图片</a></h2>
+<h3 id="参数-32"><a class="header" href="#参数-32">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>file</code></td><td>string</td><td>-</td><td>收到的图片文件名（消息段的 <code>file</code> 参数），如 <code>6B4DE3DFD1BD271E3297859D41C530F5.jpg</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-31"><a class="header" href="#响应数据-31">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>file</code></td><td>string</td><td>下载后的图片文件路径，如 <code>/home/somebody/cqhttp/data/image/6B4DE3DFD1BD271E3297859D41C530F5.jpg</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="can_send_image-检查是否可以发送图片"><a class="header" href="#can_send_image-检查是否可以发送图片"><code>can_send_image</code> 检查是否可以发送图片</a></h2>
+<h3 id="参数-33"><a class="header" href="#参数-33">参数</a></h3>
+<p>无</p>
+<h3 id="响应数据-32"><a class="header" href="#响应数据-32">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>yes</code></td><td>boolean</td><td>是或否</td></tr>
+</tbody></table>
+</div>
+<h2 id="can_send_record-检查是否可以发送语音"><a class="header" href="#can_send_record-检查是否可以发送语音"><code>can_send_record</code> 检查是否可以发送语音</a></h2>
+<h3 id="参数-34"><a class="header" href="#参数-34">参数</a></h3>
+<p>无</p>
+<h3 id="响应数据-33"><a class="header" href="#响应数据-33">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>yes</code></td><td>boolean</td><td>是或否</td></tr>
+</tbody></table>
+</div>
+<h2 id="get_status-获取运行状态"><a class="header" href="#get_status-获取运行状态"><code>get_status</code> 获取运行状态</a></h2>
+<h3 id="参数-35"><a class="header" href="#参数-35">参数</a></h3>
+<p>无</p>
+<h3 id="响应数据-34"><a class="header" href="#响应数据-34">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>online</code></td><td>boolean</td><td>当前 QQ 在线，<code>null</code> 表示无法查询到在线状态</td></tr>
+<tr><td><code>good</code></td><td>boolean</td><td>状态符合预期，意味着各模块正常运行、功能正常，且 QQ 在线</td></tr>
+<tr><td>……</td><td>-</td><td>OneBot 实现自行添加的其它内容</td></tr>
+</tbody></table>
+</div>
+<p>通常情况下建议只使用 <code>online</code> 和 <code>good</code> 这两个字段来判断运行状态，因为根据 OneBot 实现的不同，其它字段可能完全不同。</p>
+<h2 id="get_version_info-获取版本信息"><a class="header" href="#get_version_info-获取版本信息"><code>get_version_info</code> 获取版本信息</a></h2>
+<h3 id="参数-36"><a class="header" href="#参数-36">参数</a></h3>
+<p>无</p>
+<h3 id="响应数据-35"><a class="header" href="#响应数据-35">响应数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>app_name</code></td><td>string</td><td>应用标识，如 <code>mirai-native</code></td></tr>
+<tr><td><code>app_version</code></td><td>string</td><td>应用版本，如 <code>1.2.3</code></td></tr>
+<tr><td><code>protocol_version</code></td><td>string</td><td>OneBot 标准版本，如 <code>v11</code></td></tr>
+<tr><td>……</td><td>-</td><td>OneBot 实现自行添加的其它内容</td></tr>
+</tbody></table>
+</div>
+<h2 id="set_restart-重启-onebot-实现"><a class="header" href="#set_restart-重启-onebot-实现"><code>set_restart</code> 重启 OneBot 实现</a></h2>
+<p>由于重启 OneBot 实现同时需要重启 API 服务，这意味着当前的 API 请求会被中断，因此需要异步地重启，接口返回的 <code>status</code> 是 <code>async</code>。</p>
+<h3 id="参数-37"><a class="header" href="#参数-37">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>delay</code></td><td>number</td><td><code>0</code></td><td>要延迟的毫秒数，如果默认情况下无法重启，可以尝试设置延迟为 2000 左右</td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-36"><a class="header" href="#响应数据-36">响应数据</a></h3>
+<p>无</p>
+<h2 id="clean_cache-清理缓存"><a class="header" href="#clean_cache-清理缓存"><code>clean_cache</code> 清理缓存</a></h2>
+<p>用于清理积攒了太多的缓存文件。</p>
+<h3 id="参数-38"><a class="header" href="#参数-38">参数</a></h3>
+<p>无</p>
+<h3 id="响应数据-37"><a class="header" href="#响应数据-37">响应数据</a></h3>
+<p>无</p>
+<hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="api/README.html">API 概述</a></td><td><a href="api/hidden.html">隐藏 API</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="隐藏-api"><a class="header" href="#隐藏-api">隐藏 API</a></h1>
+<ul>
+<li><a href="api/hidden.html#handle_quick_operation-%E5%AF%B9%E4%BA%8B%E4%BB%B6%E6%89%A7%E8%A1%8C%E5%BF%AB%E9%80%9F%E6%93%8D%E4%BD%9C"><code>.handle_quick_operation</code> 对事件执行快速操作</a></li>
+</ul>
+<p>隐藏 API 是不建议一般用户使用的，它们只应该在 OneBot 实现内部或由 SDK 和框架使用，因为不正确的使用可能造成程序运行不正常。</p>
+<p>所有隐藏 API 都以点号（<code>.</code>）开头。</p>
+<h2 id="handle_quick_operation-对事件执行快速操作"><a class="header" href="#handle_quick_operation-对事件执行快速操作"><code>.handle_quick_operation</code> 对事件执行快速操作</a></h2>
+<p>关于事件的快速操作，见 <a href="api/../event/#%E5%BF%AB%E9%80%9F%E6%93%8D%E4%BD%9C">快速操作</a>。</p>
+<h3 id="参数-39"><a class="header" href="#参数-39">参数</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>context</code></td><td>object</td><td>-</td><td>事件数据对象，可做精简，如去掉 <code>message</code> 等无用字段</td></tr>
+<tr><td><code>operation</code></td><td>object</td><td>-</td><td>快速操作对象，例如 <code>{"ban": true, "reply": "请不要说脏话"}</code></td></tr>
+</tbody></table>
+</div>
+<h3 id="响应数据-38"><a class="header" href="#响应数据-38">响应数据</a></h3>
+<p>无</p>
+<hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="api/public.html">公开 API</a></td><td><a href="api/../event/README.html">事件概述</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="事件"><a class="header" href="#事件">事件</a></h1>
+<ul>
+<li><a href="event/index.html#%E5%86%85%E5%AE%B9%E5%AD%97%E6%AE%B5">内容字段</a></li>
+<li><a href="event/index.html#%E5%BF%AB%E9%80%9F%E6%93%8D%E4%BD%9C">快速操作</a></li>
+<li><a href="event/index.html#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B">数据类型</a></li>
+<li><a href="event/index.html#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE">相关配置</a></li>
+</ul>
+<p>事件是用户需要从 OneBot 被动接收的数据，有以下几个大类：</p>
+<ul>
+<li>消息事件，包括私聊消息、群消息等</li>
+<li>通知事件，包括群成员变动、好友变动等</li>
+<li>请求事件，包括加群请求、加好友请求等</li>
+<li>元事件，包括 OneBot 生命周期、心跳等</li>
+</ul>
+<p>在所有能够推送事件的通信方式中（HTTP POST、正向和反向 WebSocket），事件都以 JSON 格式表示。</p>
+<h2 id="内容字段"><a class="header" href="#内容字段">内容字段</a></h2>
+<p>每个事件都有 <code>time</code>、<code>self_id</code> 和 <code>post_type</code> 字段，如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td>事件类型</td></tr>
+</tbody></table>
+</div>
+<p>其中 <code>post_type</code> 不同字段值表示的事件类型对应如下：</p>
+<ul>
+<li><code>message</code>：消息事件</li>
+<li><code>notice</code>：通知事件</li>
+<li><code>request</code>：请求事件</li>
+<li><code>meta_event</code>：元事件</li>
+</ul>
+<p>其它字段随事件类型不同而有所不同，后面将在事件列表的「事件数据」小标题下给出。</p>
+<p>某些字段的值是一些固定的值，在表格的「可能的值」中给出，如果「可能的值」为空则表示没有固定的可能性。</p>
+<h2 id="快速操作-1"><a class="header" href="#快速操作-1">快速操作</a></h2>
+<p>如 <a href="event/../communication/http-post.html#%E5%BF%AB%E9%80%9F%E6%93%8D%E4%BD%9C">HTTP POST 的快速操作</a> 中所说，HTTP POST 通信方式下，用户可在服务端返回的响应中指定快速操作，事件支持的快速操作在事件列表的「快速操作」小标题下给出。</p>
+<p>在使用正向和反向 WebSocket 的情况下，可以通过 <a href="event/../api/hidden.html#handle_quick_operation-%E5%AF%B9%E4%BA%8B%E4%BB%B6%E6%89%A7%E8%A1%8C%E5%BF%AB%E9%80%9F%E6%93%8D%E4%BD%9C"><code>.handle_quick_operation</code></a> API 伪造快速操作。</p>
+<h2 id="数据类型"><a class="header" href="#数据类型">数据类型</a></h2>
+<p>在后面的事件列表中，「数据类型」使用 JSON 中的名字，例如 <code>string</code>、<code>number</code> 等。</p>
+<p>特别地，数据类型 <code>message</code> 表示该字段是一个消息类型的字段。在事件数据中，<code>message</code> 的实际类型根据用户配置的消息格式的不同而不同，支持字符串和消息段数组两种格式；而在快速操作中，<code>message</code> 类型的字段允许接受字符串、消息段数组、单个消息段对象三种类型的数据。关于消息格式的更多细节请查看 <a href="event/../message/">消息</a>。</p>
+<h2 id="相关配置-6"><a class="header" href="#相关配置-6">相关配置</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>配置项名称</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>event.message_format</code></td><td><code>string</code></td><td>事件数据中的消息格式，<code>string</code> 为字符串格式，<code>array</code> 为消息段数组格式</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="event/../api/hidden.html">隐藏 API</a></td><td><a href="event/message.html">消息事件</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="消息事件"><a class="header" href="#消息事件">消息事件</a></h1>
+<ul>
+<li><a href="event/message.html#%E7%A7%81%E8%81%8A%E6%B6%88%E6%81%AF">私聊消息</a></li>
+<li><a href="event/message.html#%E7%BE%A4%E6%B6%88%E6%81%AF">群消息</a></li>
+</ul>
+<h2 id="私聊消息"><a class="header" href="#私聊消息">私聊消息</a></h2>
+<h3 id="事件数据"><a class="header" href="#事件数据">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>message</code></td><td>上报类型</td></tr>
+<tr><td><code>message_type</code></td><td>string</td><td><code>private</code></td><td>消息类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>friend</code>、<code>group</code>、<code>other</code></td><td>消息子类型，如果是好友则是 <code>friend</code>，如果是群临时会话则是 <code>group</code></td></tr>
+<tr><td><code>message_id</code></td><td>number (int32)</td><td>-</td><td>消息 ID</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>发送者 QQ 号</td></tr>
+<tr><td><code>message</code></td><td>message</td><td>-</td><td>消息内容</td></tr>
+<tr><td><code>raw_message</code></td><td>string</td><td>-</td><td>原始消息内容</td></tr>
+<tr><td><code>font</code></td><td>number (int32)</td><td>-</td><td>字体</td></tr>
+<tr><td><code>sender</code></td><td>object</td><td>-</td><td>发送人信息</td></tr>
+</tbody></table>
+</div>
+<p>其中 <code>sender</code> 字段的内容如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>发送者 QQ 号</td></tr>
+<tr><td><code>nickname</code></td><td>string</td><td>昵称</td></tr>
+<tr><td><code>sex</code></td><td>string</td><td>性别，<code>male</code> 或 <code>female</code> 或 <code>unknown</code></td></tr>
+<tr><td><code>age</code></td><td>number (int32)</td><td>年龄</td></tr>
+</tbody></table>
+</div>
+<p>需要注意的是，<code>sender</code> 中的各字段是尽最大努力提供的，也就是说，不保证每个字段都一定存在，也不保证存在的字段都是完全正确的（缓存可能过期）。</p>
+<h3 id="快速操作-2"><a class="header" href="#快速操作-2">快速操作</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th><th>默认情况</th></tr></thead><tbody>
+<tr><td><code>reply</code></td><td>message</td><td>要回复的内容</td><td>不回复</td></tr>
+<tr><td><code>auto_escape</code></td><td>boolean</td><td>消息内容是否作为纯文本发送（即不解析 CQ 码），只在 <code>reply</code> 字段是字符串时有效</td><td>不转义</td></tr>
+</tbody></table>
+</div>
+<h2 id="群消息"><a class="header" href="#群消息">群消息</a></h2>
+<h3 id="事件数据-1"><a class="header" href="#事件数据-1">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>message</code></td><td>上报类型</td></tr>
+<tr><td><code>message_type</code></td><td>string</td><td><code>group</code></td><td>消息类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>normal</code>、<code>anonymous</code>、<code>notice</code></td><td>消息子类型，正常消息是 <code>normal</code>，匿名消息是 <code>anonymous</code>，系统提示（如「管理员已禁止群内匿名聊天」）是 <code>notice</code></td></tr>
+<tr><td><code>message_id</code></td><td>number (int32)</td><td>-</td><td>消息 ID</td></tr>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>发送者 QQ 号</td></tr>
+<tr><td><code>anonymous</code></td><td>object</td><td>-</td><td>匿名信息，如果不是匿名消息则为 null</td></tr>
+<tr><td><code>message</code></td><td>message</td><td>-</td><td>消息内容</td></tr>
+<tr><td><code>raw_message</code></td><td>string</td><td>-</td><td>原始消息内容</td></tr>
+<tr><td><code>font</code></td><td>number (int32)</td><td>-</td><td>字体</td></tr>
+<tr><td><code>sender</code></td><td>object</td><td>-</td><td>发送人信息</td></tr>
+</tbody></table>
+</div>
+<p>其中 <code>anonymous</code> 字段的内容如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>number (int64)</td><td>匿名用户 ID</td></tr>
+<tr><td><code>name</code></td><td>string</td><td>匿名用户名称</td></tr>
+<tr><td><code>flag</code></td><td>string</td><td>匿名用户 flag，在调用禁言 API 时需要传入</td></tr>
+</tbody></table>
+</div>
+<p><code>sender</code> 字段的内容如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>发送者 QQ 号</td></tr>
+<tr><td><code>nickname</code></td><td>string</td><td>昵称</td></tr>
+<tr><td><code>card</code></td><td>string</td><td>群名片／备注</td></tr>
+<tr><td><code>sex</code></td><td>string</td><td>性别，<code>male</code> 或 <code>female</code> 或 <code>unknown</code></td></tr>
+<tr><td><code>age</code></td><td>number (int32)</td><td>年龄</td></tr>
+<tr><td><code>area</code></td><td>string</td><td>地区</td></tr>
+<tr><td><code>level</code></td><td>string</td><td>成员等级</td></tr>
+<tr><td><code>role</code></td><td>string</td><td>角色，<code>owner</code> 或 <code>admin</code> 或 <code>member</code></td></tr>
+<tr><td><code>title</code></td><td>string</td><td>专属头衔</td></tr>
+</tbody></table>
+</div>
+<p>需要注意的是，<code>sender</code> 中的各字段是尽最大努力提供的，也就是说，不保证每个字段都一定存在，也不保证存在的字段都是完全正确的（缓存可能过期）。尤其对于匿名消息，此字段不具有参考价值。</p>
+<h3 id="快速操作-3"><a class="header" href="#快速操作-3">快速操作</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th><th>默认情况</th></tr></thead><tbody>
+<tr><td><code>reply</code></td><td>message</td><td>要回复的内容</td><td>不回复</td></tr>
+<tr><td><code>auto_escape</code></td><td>boolean</td><td>消息内容是否作为纯文本发送（即不解析 CQ 码），只在 <code>reply</code> 字段是字符串时有效</td><td>不转义</td></tr>
+<tr><td><code>at_sender</code></td><td>boolean</td><td>是否要在回复开头 at 发送者（自动添加），发送者是匿名用户时无效</td><td>at 发送者</td></tr>
+<tr><td><code>delete</code></td><td>boolean</td><td>撤回该条消息</td><td>不撤回</td></tr>
+<tr><td><code>kick</code></td><td>boolean</td><td>把发送者踢出群组（需要登录号权限足够），<strong>不拒绝</strong>此人后续加群请求，发送者是匿名用户时无效</td><td>不踢</td></tr>
+<tr><td><code>ban</code></td><td>boolean</td><td>把发送者禁言 <code>ban_duration</code> 指定时长，对匿名用户也有效</td><td>不禁言</td></tr>
+<tr><td><code>ban_duration</code></td><td>number</td><td>禁言时长</td><td>30 分钟</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="event/README.html">事件概述</a></td><td><a href="event/notice.html">通知事件</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="通知事件"><a class="header" href="#通知事件">通知事件</a></h1>
+<ul>
+<li><a href="event/notice.html#%E7%BE%A4%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0">群文件上传</a></li>
+<li><a href="event/notice.html#%E7%BE%A4%E7%AE%A1%E7%90%86%E5%91%98%E5%8F%98%E5%8A%A8">群管理员变动</a></li>
+<li><a href="event/notice.html#%E7%BE%A4%E6%88%90%E5%91%98%E5%87%8F%E5%B0%91">群成员减少</a></li>
+<li><a href="event/notice.html#%E7%BE%A4%E6%88%90%E5%91%98%E5%A2%9E%E5%8A%A0">群成员增加</a></li>
+<li><a href="event/notice.html#%E7%BE%A4%E7%A6%81%E8%A8%80">群禁言</a></li>
+<li><a href="event/notice.html#%E5%A5%BD%E5%8F%8B%E6%B7%BB%E5%8A%A0">好友添加</a></li>
+<li><a href="event/notice.html#%E7%BE%A4%E6%B6%88%E6%81%AF%E6%92%A4%E5%9B%9E">群消息撤回</a></li>
+<li><a href="event/notice.html#%E5%A5%BD%E5%8F%8B%E6%B6%88%E6%81%AF%E6%92%A4%E5%9B%9E">好友消息撤回</a></li>
+<li><a href="event/notice.html#%E7%BE%A4%E5%86%85%E6%88%B3%E4%B8%80%E6%88%B3">群内戳一戳</a></li>
+<li><a href="event/notice.html#%E7%BE%A4%E7%BA%A2%E5%8C%85%E8%BF%90%E6%B0%94%E7%8E%8B">群红包运气王</a></li>
+<li><a href="event/notice.html#%E7%BE%A4%E6%88%90%E5%91%98%E8%8D%A3%E8%AA%89%E5%8F%98%E6%9B%B4">群成员荣誉变更</a></li>
+</ul>
+<h2 id="群文件上传"><a class="header" href="#群文件上传">群文件上传</a></h2>
+<h3 id="事件数据-2"><a class="header" href="#事件数据-2">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>group_upload</code></td><td>通知类型</td></tr>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>发送者 QQ 号</td></tr>
+<tr><td><code>file</code></td><td>object</td><td>-</td><td>文件信息</td></tr>
+</tbody></table>
+</div>
+<p>其中 <code>file</code> 字段的内容如下：</p>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>string</td><td>文件 ID</td></tr>
+<tr><td><code>name</code></td><td>string</td><td>文件名</td></tr>
+<tr><td><code>size</code></td><td>number (int64)</td><td>文件大小（字节数）</td></tr>
+<tr><td><code>busid</code></td><td>number (int64)</td><td>busid（目前不清楚有什么作用）</td></tr>
+</tbody></table>
+</div>
+<h2 id="群管理员变动"><a class="header" href="#群管理员变动">群管理员变动</a></h2>
+<h3 id="事件数据-3"><a class="header" href="#事件数据-3">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>group_admin</code></td><td>通知类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>set</code>、<code>unset</code></td><td>事件子类型，分别表示设置和取消管理员</td></tr>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>管理员 QQ 号</td></tr>
+</tbody></table>
+</div>
+<h2 id="群成员减少"><a class="header" href="#群成员减少">群成员减少</a></h2>
+<h3 id="事件数据-4"><a class="header" href="#事件数据-4">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>group_decrease</code></td><td>通知类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>leave</code>、<code>kick</code>、<code>kick_me</code></td><td>事件子类型，分别表示主动退群、成员被踢、登录号被踢</td></tr>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>-</td><td>群号</td></tr>
+<tr><td><code>operator_id</code></td><td>number (int64)</td><td>-</td><td>操作者 QQ 号（如果是主动退群，则和 <code>user_id</code> 相同）</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>离开者 QQ 号</td></tr>
+</tbody></table>
+</div>
+<h2 id="群成员增加"><a class="header" href="#群成员增加">群成员增加</a></h2>
+<h3 id="事件数据-5"><a class="header" href="#事件数据-5">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>group_increase</code></td><td>通知类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>approve</code>、<code>invite</code></td><td>事件子类型，分别表示管理员已同意入群、管理员邀请入群</td></tr>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>-</td><td>群号</td></tr>
+<tr><td><code>operator_id</code></td><td>number (int64)</td><td>-</td><td>操作者 QQ 号</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>加入者 QQ 号</td></tr>
+</tbody></table>
+</div>
+<h2 id="群禁言"><a class="header" href="#群禁言">群禁言</a></h2>
+<h3 id="事件数据-6"><a class="header" href="#事件数据-6">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>group_ban</code></td><td>通知类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>ban</code>、<code>lift_ban</code></td><td>事件子类型，分别表示禁言、解除禁言</td></tr>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>-</td><td>群号</td></tr>
+<tr><td><code>operator_id</code></td><td>number (int64)</td><td>-</td><td>操作者 QQ 号</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>被禁言 QQ 号</td></tr>
+<tr><td><code>duration</code></td><td>number (int64)</td><td>-</td><td>禁言时长，单位秒</td></tr>
+</tbody></table>
+</div>
+<h2 id="好友添加"><a class="header" href="#好友添加">好友添加</a></h2>
+<h3 id="事件数据-7"><a class="header" href="#事件数据-7">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>friend_add</code></td><td>通知类型</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>新添加好友 QQ 号</td></tr>
+</tbody></table>
+</div>
+<h2 id="群消息撤回"><a class="header" href="#群消息撤回">群消息撤回</a></h2>
+<h3 id="事件数据-8"><a class="header" href="#事件数据-8">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>group_recall</code></td><td>通知类型</td></tr>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td></td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td></td><td>消息发送者 QQ 号</td></tr>
+<tr><td><code>operator_id</code></td><td>number (int64)</td><td></td><td>操作者 QQ 号</td></tr>
+<tr><td><code>message_id</code></td><td>number (int64)</td><td></td><td>被撤回的消息 ID</td></tr>
+</tbody></table>
+</div>
+<h2 id="好友消息撤回"><a class="header" href="#好友消息撤回">好友消息撤回</a></h2>
+<h3 id="事件数据-9"><a class="header" href="#事件数据-9">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>friend_recall</code></td><td>通知类型</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td></td><td>好友 QQ 号</td></tr>
+<tr><td><code>message_id</code></td><td>number (int64)</td><td></td><td>被撤回的消息 ID</td></tr>
+</tbody></table>
+</div>
+<h2 id="群内戳一戳"><a class="header" href="#群内戳一戳">群内戳一戳</a></h2>
+<h3 id="上报数据"><a class="header" href="#上报数据">上报数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段</th><th>类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>notify</code></td><td>消息类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>poke</code></td><td>提示类型</td></tr>
+<tr><td><code>group_id</code></td><td>int64</td><td></td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>int64</td><td></td><td>发送者 QQ 号</td></tr>
+<tr><td><code>target_id</code></td><td>int64</td><td></td><td>被戳者 QQ 号</td></tr>
+</tbody></table>
+</div>
+<h2 id="群红包运气王"><a class="header" href="#群红包运气王">群红包运气王</a></h2>
+<h3 id="上报数据-1"><a class="header" href="#上报数据-1">上报数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段</th><th>类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>notify</code></td><td>消息类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>lucky_king</code></td><td>提示类型</td></tr>
+<tr><td><code>group_id</code></td><td>int64</td><td></td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>int64</td><td></td><td>红包发送者 QQ 号</td></tr>
+<tr><td><code>target_id</code></td><td>int64</td><td></td><td>运气王 QQ 号</td></tr>
+</tbody></table>
+</div>
+<h2 id="群成员荣誉变更"><a class="header" href="#群成员荣誉变更">群成员荣誉变更</a></h2>
+<h3 id="上报数据-2"><a class="header" href="#上报数据-2">上报数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段</th><th>类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>notice</code></td><td>上报类型</td></tr>
+<tr><td><code>notice_type</code></td><td>string</td><td><code>notify</code></td><td>消息类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>honor</code></td><td>提示类型</td></tr>
+<tr><td><code>group_id</code></td><td>int64</td><td></td><td>群号</td></tr>
+<tr><td><code>honor_type</code></td><td>string</td><td><code>talkative</code>、<code>performer</code>、<code>emotion</code></td><td>荣誉类型，分别表示龙王、群聊之火、快乐源泉</td></tr>
+<tr><td><code>user_id</code></td><td>int64</td><td></td><td>成员 QQ 号</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="event/message.html">消息事件</a></td><td><a href="event/request.html">请求事件</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="请求事件"><a class="header" href="#请求事件">请求事件</a></h1>
+<ul>
+<li><a href="event/request.html#%E5%8A%A0%E5%A5%BD%E5%8F%8B%E8%AF%B7%E6%B1%82">加好友请求</a></li>
+<li><a href="event/request.html#%E5%8A%A0%E7%BE%A4%E8%AF%B7%E6%B1%82%E9%82%80%E8%AF%B7">加群请求／邀请</a></li>
+</ul>
+<h2 id="加好友请求"><a class="header" href="#加好友请求">加好友请求</a></h2>
+<h3 id="事件数据-10"><a class="header" href="#事件数据-10">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>request</code></td><td>上报类型</td></tr>
+<tr><td><code>request_type</code></td><td>string</td><td><code>friend</code></td><td>请求类型</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>发送请求的 QQ 号</td></tr>
+<tr><td><code>comment</code></td><td>string</td><td>-</td><td>验证信息</td></tr>
+<tr><td><code>flag</code></td><td>string</td><td>-</td><td>请求 flag，在调用处理请求的 API 时需要传入</td></tr>
+</tbody></table>
+</div>
+<h3 id="快速操作-4"><a class="header" href="#快速操作-4">快速操作</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th><th>默认情况</th></tr></thead><tbody>
+<tr><td><code>approve</code></td><td>boolean</td><td>是否同意请求</td><td>不处理</td></tr>
+<tr><td><code>remark</code></td><td>string</td><td>添加后的好友备注（仅在同意时有效）</td><td>无备注</td></tr>
+</tbody></table>
+</div>
+<h2 id="加群请求邀请"><a class="header" href="#加群请求邀请">加群请求／邀请</a></h2>
+<h3 id="事件数据-11"><a class="header" href="#事件数据-11">事件数据</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>request</code></td><td>上报类型</td></tr>
+<tr><td><code>request_type</code></td><td>string</td><td><code>group</code></td><td>请求类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>add</code>、<code>invite</code></td><td>请求子类型，分别表示加群请求、邀请登录号入群</td></tr>
+<tr><td><code>group_id</code></td><td>number (int64)</td><td>-</td><td>群号</td></tr>
+<tr><td><code>user_id</code></td><td>number (int64)</td><td>-</td><td>发送请求的 QQ 号</td></tr>
+<tr><td><code>comment</code></td><td>string</td><td>-</td><td>验证信息</td></tr>
+<tr><td><code>flag</code></td><td>string</td><td>-</td><td>请求 flag，在调用处理请求的 API 时需要传入</td></tr>
+</tbody></table>
+</div>
+<h3 id="快速操作-5"><a class="header" href="#快速操作-5">快速操作</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>说明</th><th>默认情况</th></tr></thead><tbody>
+<tr><td><code>approve</code></td><td>boolean</td><td>是否同意请求／邀请</td><td>不处理</td></tr>
+<tr><td><code>reason</code></td><td>string</td><td>拒绝理由（仅在拒绝时有效）</td><td>无理由</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="event/notice.html">通知事件</a></td><td><a href="event/meta.html">元事件</a></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="元事件"><a class="header" href="#元事件">元事件</a></h1>
+<ul>
+<li><a href="event/meta.html#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F">生命周期</a></li>
+<li><a href="event/meta.html#%E5%BF%83%E8%B7%B3">心跳</a></li>
+<li><a href="event/meta.html#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE">相关配置</a></li>
+</ul>
+<p>消息、通知、请求三大类事件是与聊天软件直接相关的、机器人真实接收到的事件，除了这些，OneBot 自己还会产生一类事件，这里称之为「元事件」，例如生命周期事件、心跳事件等，这类事件与 OneBot 本身的运行状态有关，而与聊天软件无关。元事件的上报方式和普通事件完全一样。</p>
+<h2 id="生命周期"><a class="header" href="#生命周期">生命周期</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>meta_event</code></td><td>上报类型</td></tr>
+<tr><td><code>meta_event_type</code></td><td>string</td><td><code>lifecycle</code></td><td>元事件类型</td></tr>
+<tr><td><code>sub_type</code></td><td>string</td><td><code>enable</code>、<code>disable</code>、<code>connect</code></td><td>事件子类型，分别表示 OneBot 启用、停用、WebSocket 连接成功</td></tr>
+</tbody></table>
+</div>
+<p><strong>注意，目前生命周期元事件中，只有 HTTP POST 的情况下可以收到 <code>enable</code> 和 <code>disable</code>，只有正向 WebSocket 和反向 WebSocket 可以收到 <code>connect</code>。</strong></p>
+<h2 id="心跳"><a class="header" href="#心跳">心跳</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>字段名</th><th>数据类型</th><th>可能的值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>time</code></td><td>number (int64)</td><td>-</td><td>事件发生的时间戳</td></tr>
+<tr><td><code>self_id</code></td><td>number (int64)</td><td>-</td><td>收到事件的机器人 QQ 号</td></tr>
+<tr><td><code>post_type</code></td><td>string</td><td><code>meta_event</code></td><td>上报类型</td></tr>
+<tr><td><code>meta_event_type</code></td><td>string</td><td><code>heartbeat</code></td><td>元事件类型</td></tr>
+<tr><td><code>status</code></td><td>object</td><td>-</td><td>状态信息</td></tr>
+<tr><td><code>interval</code></td><td>number (int64)</td><td>-</td><td>到下次心跳的间隔，单位毫秒</td></tr>
+</tbody></table>
+</div>
+<p>其中 <code>status</code> 字段的内容和 <code>get_status</code> 接口的快速操作相同。</p>
+<h2 id="相关配置-7"><a class="header" href="#相关配置-7">相关配置</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>配置项</th><th>默认值</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>heartbeat.enable</code></td><td><code>false</code></td><td>是否启用心跳机制</td></tr>
+<tr><td><code>heartbeat.interval</code></td><td><code>15000</code></td><td>产生心跳元事件的时间间隔，单位毫秒</td></tr>
+</tbody></table>
+</div><hr>
+<div class="table-wrapper"><table><thead><tr><th>上一节</th><th>下一节</th></tr></thead><tbody>
+<tr><td><a href="event/request.html">请求事件</a></td><td>无</td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

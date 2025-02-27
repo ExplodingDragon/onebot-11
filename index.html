@@ -1,0 +1,256 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>关于 - OneBot V11 Spec</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">OneBot V11 Spec</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="介绍"><a class="header" href="#介绍">介绍</a></h1>
+<ul>
+<li><a href="#%E8%83%8C%E6%99%AF">背景</a></li>
+<li><a href="#%E5%8A%A8%E6%9C%BA">动机</a></li>
+<li><a href="#%E9%A2%84%E6%9C%9F">预期</a></li>
+<li><a href="#%E5%86%85%E5%AE%B9%E7%9B%AE%E5%BD%95">内容目录</a></li>
+</ul>
+<p>OneBot 标准是从原 CKYU 平台的 CQHTTP 插件接口修改而来的通用聊天机器人应用接口标准。</p>
+<h2 id="背景"><a class="header" href="#背景">背景</a></h2>
+<p>CQHTTP 插件是 2017 年初出现的基于 CKYU 机器人平台的一款开源免费插件，它使用户能够通过 HTTP 或 WebSocket 对 CKYU 的事件进行上报以及接收请求来调用 CKYU 的 DLL 接口，从而可以使用其它语言（不方便编译到原生二进制的语言）编写 CKYU 插件。</p>
+<p>有非常多的开发者使用 Python、Java、Node.js 等 web 开发常用语言基于 CQHTTP 插件编写各式各样的聊天机器人。</p>
+<p>在新的机器人平台 Mirai 开始发展之后，以及 CKYU 决定停运之后，为了让原来基于 CQHTTP 插件编写的机器人能够继续运行，一些开发者在其它机器人平台上编写了兼容 CQHTTP 接口的插件/模块。</p>
+<h2 id="动机"><a class="header" href="#动机">动机</a></h2>
+<p>基于 CQHTTP 插件编写的机器人项目有很多，CKYU 停运后，如果不能平滑迁移到其它平台，这些项目的很多代码都需要重写，甚至有很多项目可能被迫放弃维护，这对机器人开发社区来说是一种损失和浪费。</p>
+<p>目前各 CQHTTP 兼容项目通常是实现了部分原 CQHTTP 插件的接口，并利用新平台的特性，新增了一些拓展接口。长远来看，这可能导致不同兼容项目最终形成了各自的「CQHTTP 接口变种」，当用户深度接入其中一个兼容项目后，可能又会出现与其它变种不兼容的情况，最终仍然存在潜在的迁移困难。</p>
+<p>本项目希望通过改写原 CQHTTP 插件文档 + 引入 CQHTTP 兼容项目的新特性的方式，维护一个统一的、不断发展的接口标准（即 OneBot 标准），推动各 CQHTTP 兼容项目实现长远的兼容，为用户带来便利。</p>
+<h2 id="预期"><a class="header" href="#预期">预期</a></h2>
+<p>开发者可以在各类机器人平台实现 OneBot 标准，从而使用户可以将基于 OneBot 标准的机器人项目无缝迁移到这些平台。</p>
+<p>当需要添加新的功能（例如新的事件、API、消息段类型等）时，可以通过 pull request 扩充本标准，此后其它 OneBot 实现在添加同一功能时应参考扩充后的标准。</p>
+<h2 id="内容目录"><a class="header" href="#内容目录">内容目录</a></h2>
+<ul>
+<li><strong>通信</strong>
+<ul>
+<li><a href="communication/README.html">通信概述</a></li>
+<li><a href="communication/http.html">HTTP</a></li>
+<li><a href="communication/http-post.html">HTTP POST</a></li>
+<li><a href="communication/ws.html">正向 WebSocket</a></li>
+<li><a href="communication/ws-reverse.html">反向 WebSocket</a></li>
+<li><a href="communication/authorization.html">鉴权</a></li>
+</ul>
+</li>
+<li><strong>消息</strong>
+<ul>
+<li><a href="message/README.html">消息概述</a></li>
+<li><a href="message/string.html">字符串格式</a></li>
+<li><a href="message/array.html">数组格式</a></li>
+<li><a href="message/segment.html">消息段类型</a></li>
+</ul>
+</li>
+<li><strong>API</strong>
+<ul>
+<li><a href="api/README.html">API 概述</a></li>
+<li><a href="api/public.html">公开 API</a></li>
+<li><a href="api/hidden.html">隐藏 API</a></li>
+</ul>
+</li>
+<li><strong>事件</strong>
+<ul>
+<li><a href="event/README.html">事件概述</a></li>
+<li><a href="event/message.html">消息事件</a></li>
+<li><a href="event/notice.html">通知事件</a></li>
+<li><a href="event/request.html">请求事件</a></li>
+<li><a href="event/meta.html">元事件</a></li>
+</ul>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+                            <a rel="next prefetch" href="communication/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+                    <a rel="next prefetch" href="communication/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
