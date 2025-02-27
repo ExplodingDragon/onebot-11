@@ -1,0 +1,6 @@
+[book]
+authors = ["dragon"]
+language = "zh"
+multilingual = false
+src = ""
+title = "OneBot V11 Spec"
